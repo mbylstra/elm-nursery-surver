@@ -2,13 +2,13 @@ module Lib exposing (..)
 
 import Html.Events exposing (onWithOptions)
 import Html.Attributes exposing (href)
-import Html exposing (Html, a)
+import Html exposing (Html)
 import Json.Decode as Decode exposing (Decoder)
 
 
 link : msg -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
 link msg attributes content =
-    a
+    Html.a
         ([ onWithOptions
             "click"
             { preventDefault = True, stopPropagation = False }

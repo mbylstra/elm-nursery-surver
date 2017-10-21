@@ -1,0 +1,10 @@
+{
+  "checks" : {
+      "ExposeAll": false,
+      "ImportAll": false,
+      "LineLengthExceeded": false,
+      "DebugCrash": false,
+      "DebugLog": false,
+      "SingleFieldRecord": false
+  }
+}

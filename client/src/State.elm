@@ -61,7 +61,7 @@ setSourceDirectories sourceDirectories model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case (Debug.log "msg" msg) of
+    case Debug.log "msg" msg of
         ReceiveElmSourceDirectories result ->
             -- This is really the second part of the init function. This is only
             -- ever called on app initialisation once after we get the list of
@@ -212,14 +212,14 @@ deserializeStateFromUrl model =
         if pathname == "/" then
             ( { model | page = Home }, Cmd.none )
         else
-            let
-                -- this will be necessary later
-                ( sourceDirectory, modulePath ) =
-                    splitBySourceDirectory model.sourceDirectories pathname
-            in
-                ( model
-                , Http.send ReceiveDirectoryContents (directoryContentsRequest pathname)
-                )
+            -- let
+            -- this will be necessary later
+            -- ( _, modulePath ) =
+            --     splitBySourceDirectory model.sourceDirectories pathname
+            -- in
+            ( model
+            , Http.send ReceiveDirectoryContents (directoryContentsRequest pathname)
+            )
 
 
 splitBySourceDirectory : List File -> String -> ( String, String )
@@ -228,7 +228,7 @@ splitBySourceDirectory sourceDirectories path =
         sourceDirectory =
             sourceDirectories
                 |> List.map .name
-                |> List.filter (\sourceDirectory -> String.startsWith sourceDirectory path)
+                |> List.filter (\dir -> String.startsWith dir path)
                 |> List.head
                 |> Maybe.withDefault ""
     in

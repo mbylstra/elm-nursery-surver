@@ -22,7 +22,9 @@ type Page
 
 
 type alias DirectoryContentsR =
-    { currentDirectory : String, files : List File }
+    { currentDirectory : String
+    , files : List File
+    }
 
 
 type alias File =

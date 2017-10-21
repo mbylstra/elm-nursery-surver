@@ -48,9 +48,8 @@ view model =
                         [ p [] [ text "There are no view functions in this module" ] ]
 
                     _ ->
-                        ([ h2 [] [ text "View Functions" ] ]
-                            ++ (List.map (viewFunctionLinkView { elmModulePath = elmModulePath }) viewFunctions)
-                        )
+                        h2 [] [ text "View Functions" ]
+                            :: List.map (viewFunctionLinkView { elmModulePath = elmModulePath }) viewFunctions
                 )
 
         ViewFunction result ->
@@ -93,7 +92,7 @@ fileList { currentDirectory, files } =
 
 
 mainView : Model -> List (Html Msg) -> Html Msg
-mainView model content =
+mainView _ content =
     div []
         ([ img [ src "/logo.svg" ] []
          , h1 [] [ text "Elm Nursery" ]
@@ -112,9 +111,6 @@ fileView basePath file =
 
                 ElmModule ->
                     Icons.file
-
-        fullFilePath =
-            basePath ++ file.name
     in
         li []
             [ Lib.link (FileClicked basePath file)

@@ -2,7 +2,7 @@ module Requests exposing (..)
 
 import Http
 import Json.Decode as Decode exposing (Decoder)
-import Types exposing (DirectoryContentsR, File, Model, FileType(..))
+import Types exposing (DirectoryContentsR, File, FileType(..))
 
 
 apiBaseUrl : String
@@ -21,7 +21,7 @@ directoryContentsRequest : String -> Http.Request DirectoryContentsR
 directoryContentsRequest directory =
     let
         params =
-            "?directory=" ++ (Http.encodeUri directory)
+            "?directory=" ++ Http.encodeUri directory
     in
         Http.get (apiBaseUrl ++ "api/directory-contents/" ++ params) directoryContentsDecoder
 
@@ -30,7 +30,7 @@ elmModuleViewFunctionsRequest : String -> Http.Request (List String)
 elmModuleViewFunctionsRequest elmModulePath =
     let
         params =
-            "?filePath=" ++ (Http.encodeUri elmModulePath)
+            "?filePath=" ++ Http.encodeUri elmModulePath
     in
         Http.get (apiBaseUrl ++ "api/elm-module-view-functions/" ++ params) (Decode.list Decode.string)
 
@@ -39,7 +39,7 @@ generateViewFunctionRequest : { elmModulePath : String, viewFunction : String } 
 generateViewFunctionRequest { elmModulePath, viewFunction } =
     let
         params =
-            "?elmModulePath=" ++ (Http.encodeUri elmModulePath) ++ "&viewFunction=" ++ viewFunction
+            "?elmModulePath=" ++ Http.encodeUri elmModulePath ++ "&viewFunction=" ++ viewFunction
 
         viewFunctionDecoder =
             Decode.string
