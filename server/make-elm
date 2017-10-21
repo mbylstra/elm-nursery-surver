@@ -1,0 +1,2 @@
+elm-make src/Main.elm --output elm.js
+elm-make src/FindViewFunctionsApp.elm --output find-view-functions-elm-app.js

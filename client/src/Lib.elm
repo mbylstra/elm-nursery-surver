@@ -3,7 +3,7 @@ module Lib exposing (..)
 import Html.Events exposing (onWithOptions)
 import Html.Attributes exposing (href)
 import Html exposing (Html, a)
-import Json.Decode
+import Json.Decode as Decode exposing (Decoder)
 
 
 link : msg -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
@@ -12,9 +12,21 @@ link msg attributes content =
         ([ onWithOptions
             "click"
             { preventDefault = True, stopPropagation = False }
-            (Json.Decode.succeed msg)
+            (Decode.succeed msg)
          , href "#"
          ]
             ++ attributes
         )
         content
+
+
+{-| <https://stackoverflow.com/a/42704577/343043>
+-}
+arrayAsTuple2 : Decoder a -> Decoder b -> Decoder ( a, b )
+arrayAsTuple2 a b =
+    Decode.index 0 a
+        |> Decode.andThen
+            (\aVal ->
+                Decode.index 1 b
+                    |> Decode.andThen (\bVal -> Decode.succeed ( aVal, bVal ))
+            )

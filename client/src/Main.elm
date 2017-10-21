@@ -1,10 +1,10 @@
 module Main exposing (..)
 
-import Html exposing (Html, text, div, img, h1, li, a, ul, span)
+import Html exposing (Html, text, div, img, h1, li, a, ul, span, p, h2, h3, pre)
 import Html.Attributes exposing (src, href, class)
 import Http
 import Json.Decode as Decode exposing (Decoder)
-import Lib
+import Lib exposing (arrayAsTuple2)
 import Navigation exposing (Location)
 import Icons
 
@@ -35,6 +35,8 @@ type Page
     = Loading
     | Home
     | DirectoryContents DirectoryContentsR
+    | ElmModuleViewFunctions { elmModulePath : String, viewFunctions : List String }
+    | ViewFunction (Result String String)
 
 
 type alias DirectoryContentsR =
@@ -65,12 +67,21 @@ initWithPage location page =
 
 init : Location -> ( Model, Cmd Msg )
 init location =
-    initWithPage location Loading
+    let
+        _ =
+            Debug.log "init from inside Elm"
+    in
+        initWithPage location Loading
 
 
 setLinkClicked : Model -> Model
 setLinkClicked model =
     { model | linkClicked = True }
+
+
+setToLoadingPage : Model -> Model
+setToLoadingPage model =
+    { model | page = Loading }
 
 
 setSourceDirectories : List File -> Model -> Model
@@ -86,7 +97,10 @@ type Msg
     = ReceiveElmSourceDirectories (Result Http.Error (List File))
     | FileClicked String File
     | ReceiveDirectoryContents (Result Http.Error DirectoryContentsR)
+    | ReceiveElmModuleViewFunctions { elmModulePath : String } (Result Http.Error (List String))
     | NewLocation Location
+    | ViewFunctionClicked { elmModulePath : String, viewFunction : String }
+    | ReceiveViewFunctionOutput (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -121,6 +135,38 @@ update msg model =
                 Err err ->
                     Debug.crash (toString err)
 
+        ReceiveElmModuleViewFunctions { elmModulePath } viewFunctionsResult ->
+            case viewFunctionsResult of
+                Ok viewFunctions ->
+                    ( { model
+                        | page =
+                            ElmModuleViewFunctions
+                                { elmModulePath = elmModulePath, viewFunctions = viewFunctions }
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    Debug.crash (toString err)
+
+        ReceiveViewFunctionOutput result ->
+            case result of
+                Ok s ->
+                    ( { model | page = ViewFunction (Ok s) }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    case err of
+                        Http.BadStatus response ->
+                            ( { model | page = ViewFunction (Err response.body) }
+                            , Cmd.none
+                            )
+
+                        _ ->
+                            Debug.crash (toString err)
+
+        --
         NewLocation location ->
             let
                 _ =
@@ -128,12 +174,38 @@ update msg model =
             in
                 handleUrlChanged location model
 
+        ViewFunctionClicked ({ elmModulePath, viewFunction } as requestParams) ->
+            let
+                url =
+                    elmModulePath ++ "/" ++ viewFunction
+
+                setNewUrl =
+                    Navigation.newUrl url
+            in
+                model ! [ Http.send ReceiveViewFunctionOutput (generateViewFunctionRequest requestParams), setNewUrl ]
+
 
 handleFileClicked : String -> File -> Model -> ( Model, Cmd Msg )
 handleFileClicked basePath file model =
     case file.fileType of
         ElmModule ->
-            Debug.crash "we don't do this yet!"
+            let
+                fullPath =
+                    basePath ++ "/" ++ file.name
+
+                setNewUrl =
+                    Navigation.newUrl fullPath
+            in
+                ( model
+                    |> setLinkClicked
+                    |> setToLoadingPage
+                , Cmd.batch
+                    [ Http.send
+                        (ReceiveElmModuleViewFunctions { elmModulePath = fullPath })
+                        (elmModuleViewFunctionsRequest fullPath)
+                    , setNewUrl
+                    ]
+                )
 
         Directory ->
             let
@@ -215,8 +287,11 @@ view : Model -> Html Msg
 view model =
     case model.page of
         Loading ->
-            -- the user will never see this - we're just waiting for Node to parse a single file.
-            div [] []
+            mainView
+                model
+                [ div [ class "spinner" ]
+                    [ div [ class "sk-rotating-plane" ] [] ]
+                ]
 
         Home ->
             let
@@ -232,7 +307,55 @@ view model =
         DirectoryContents directoryContents ->
             mainView
                 model
-                [ fileList directoryContents ]
+                (case directoryContents.files of
+                    [] ->
+                        [ p [] [ text "There are no Elm files in this directory" ] ]
+
+                    _ ->
+                        [ fileList directoryContents ]
+                )
+
+        ElmModuleViewFunctions { elmModulePath, viewFunctions } ->
+            mainView
+                model
+                (case viewFunctions of
+                    [] ->
+                        [ p [] [ text "There are no view functions in this module" ] ]
+
+                    _ ->
+                        ([ h2 [] [ text "View Functions" ] ]
+                            ++ (List.map (viewFunctionLinkView { elmModulePath = elmModulePath }) viewFunctions)
+                        )
+                )
+
+        ViewFunction result ->
+            case result of
+                Ok code ->
+                    mainView
+                        model
+                        [ h2 [] [ text "todo" ]
+                        , viewFunctionCodeView ( "todo", code )
+                        ]
+
+                Err message ->
+                    mainView
+                        model
+                        [ pre [ class "error" ] [ text message ] ]
+
+
+viewFunctionLinkView : { elmModulePath : String } -> String -> Html Msg
+viewFunctionLinkView { elmModulePath } viewFunction =
+    p []
+        [ Lib.link
+            (ViewFunctionClicked
+                { elmModulePath = elmModulePath, viewFunction = viewFunction }
+            )
+            [ class "file-link"
+            ]
+            [ span [ class "icon" ] [ Icons.eye ]
+            , text viewFunction
+            ]
+        ]
 
 
 fileList : DirectoryContentsR -> Html Msg
@@ -278,6 +401,14 @@ fileView basePath file =
             ]
 
 
+viewFunctionCodeView : ( String, String ) -> Html msg
+viewFunctionCodeView ( functionName, code ) =
+    div []
+        [ h3 [] [ text functionName ]
+        , pre [] [ text code ]
+        ]
+
+
 
 --- REQUESTS ----
 
@@ -285,7 +416,7 @@ fileView basePath file =
 elmSourceDirectoriesRequest : Http.Request (List File)
 elmSourceDirectoriesRequest =
     Http.get
-        (apiBaseUrl ++ "api/elm-source-directories")
+        (apiBaseUrl ++ "api/elm-source-directories/")
         (Decode.list (Decode.string |> Decode.map (\fileName -> File Directory fileName)))
 
 
@@ -295,7 +426,28 @@ directoryContentsRequest directory =
         params =
             "?directory=" ++ (Http.encodeUri directory)
     in
-        Http.get (apiBaseUrl ++ "api/directory-contents" ++ params) directoryContentsDecoder
+        Http.get (apiBaseUrl ++ "api/directory-contents/" ++ params) directoryContentsDecoder
+
+
+elmModuleViewFunctionsRequest : String -> Http.Request (List String)
+elmModuleViewFunctionsRequest elmModulePath =
+    let
+        params =
+            "?filePath=" ++ (Http.encodeUri elmModulePath)
+    in
+        Http.get (apiBaseUrl ++ "api/elm-module-view-functions/" ++ params) (Decode.list Decode.string)
+
+
+generateViewFunctionRequest : { elmModulePath : String, viewFunction : String } -> Http.Request String
+generateViewFunctionRequest { elmModulePath, viewFunction } =
+    let
+        params =
+            "?elmModulePath=" ++ (Http.encodeUri elmModulePath) ++ "&viewFunction=" ++ viewFunction
+
+        viewFunctionDecoder =
+            Decode.string
+    in
+        Http.get (apiBaseUrl ++ "api/view-function/" ++ params) viewFunctionDecoder
 
 
 fileDecoder : Decoder File

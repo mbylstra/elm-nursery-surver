@@ -3,7 +3,8 @@ body {
     'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
   font-size: 20px;
   margin: 0;
-  text-align: center;
+  margin-left: 100px;
+  margin-top: 50px;
   color: #293c4b;
 }
 
@@ -14,11 +15,13 @@ img {
 
 .files {
   display: flex;
-  justify-content: center;
+  justify-content: left;
 }
 
 .files ul {
   text-align: left;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 .files li {
@@ -45,4 +48,57 @@ a:hover {
 }
 .icon svg {
   height: 25px;
+}
+
+pre {
+  font-size: 14px;
+  padding: 15px;
+  background-color: #ccc;
+}
+
+pre.error {
+  background-color: pink;
+}
+
+.spinner {
+  margin-top: 100px;
+}
+
+.sk-rotating-plane {
+  width: 80px;
+  height: 80px;
+  background-color: #60b5cc;
+  margin: 80px auto;
+  -webkit-animation: sk-rotatePlane 1.2s infinite ease-in-out;
+  animation: sk-rotatePlane 1.2s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-rotatePlane {
+  0% {
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+  }
+  100% {
+    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+}
+
+@keyframes sk-rotatePlane {
+  0% {
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+  }
+  100% {
+    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
 }
