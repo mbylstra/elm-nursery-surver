@@ -4,6 +4,8 @@ import Http
 import Navigation exposing (Location)
 import Types exposing (DirectoryContentsR, File, Model, Page(..), FileType(..))
 import Requests exposing (..)
+import QueryString
+import Path.Posix as Path
 
 
 type Msg
@@ -133,7 +135,7 @@ update msg model =
         ViewFunctionClicked ({ elmModulePath, viewFunction } as requestParams) ->
             let
                 url =
-                    elmModulePath ++ "/" ++ viewFunction
+                    elmModulePath ++ "?function=" ++ viewFunction
 
                 setNewUrl =
                     Navigation.newUrl url
@@ -206,30 +208,31 @@ handleUrlChanged location model =
 deserializeStateFromUrl : Model -> ( Model, Cmd Msg )
 deserializeStateFromUrl model =
     let
-        pathname =
+        path =
             model.location.pathname
+        maybeFunctionName =
+            model.location.search
+            |> QueryString.parse
+            |> QueryString.one QueryString.string "function"
+
+        (dirPath, fileName) = Path.splitFileName path
+
     in
-        if pathname == "/" then
+        if path == "/" then
             ( { model | page = Home }, Cmd.none )
         else
-            -- let
-            -- this will be necessary later
-            -- ( _, modulePath ) =
-            --     splitBySourceDirectory model.sourceDirectories pathname
-            -- in
-            ( model
-            , Http.send ReceiveDirectoryContents (directoryContentsRequest pathname)
-            )
+            case maybeFunctionName of
+                Just functionName ->
+                    ( model
+                    , Http.send ReceiveViewFunctionOutput (generateViewFunctionRequest { elmModulePath = path, viewFunction = functionName })
+                    )
 
-
-splitBySourceDirectory : List File -> String -> ( String, String )
-splitBySourceDirectory sourceDirectories path =
-    let
-        sourceDirectory =
-            sourceDirectories
-                |> List.map .name
-                |> List.filter (\dir -> String.startsWith dir path)
-                |> List.head
-                |> Maybe.withDefault ""
-    in
-        ( sourceDirectory, String.dropLeft (String.length sourceDirectory) path )
+                Nothing ->
+                    if fileName == "" then
+                        ( model
+                        , Http.send ReceiveDirectoryContents (directoryContentsRequest dirPath)
+                        )
+                    else
+                        ( model
+                        , Http.send (ReceiveElmModuleViewFunctions  {elmModulePath = path})(elmModuleViewFunctionsRequest path  )
+                        )
