@@ -347,38 +347,6 @@ handleReadSourceFilesMsg { model, moduleName, rsfMsg, isTooManyCmdsInFlight } =
         _ =
             Debug.log "writeOutputFileCmd" writeOutputFileCmd
 
-        writeOutputFileCmd =
-            let
-                _ =
-                    Debug.log "writeOutputFileCmd" True
-            in
-                case isFinished newModel of
-                    True ->
-                        let
-                            _ =
-                                Debug.log "generating view functions" True
-
-                            simplifiedAllModuleInfos =
-                                simplifyAllModulesInfo newModel.allModulesInfo newModel.subjectModuleInfo
-
-                            _ =
-                                Debug.log "simplifiedAllModuleInfos" simplifiedAllModuleInfos
-
-                            output =
-                                generateViewFunctions
-                                    { subjectModuleInfo = newModel.subjectModuleInfo
-                                    , allModulesInfo = simplifiedAllModuleInfos
-                                    }
-
-                            -- |> String.join "\n\n\n\n"
-                            _ =
-                                Debug.log "generated view functions" True
-                        in
-                            writeOutput output
-
-                    False ->
-                        Cmd.none
-
         -- _ =
         --     case isFinished newModel of
         --         True ->
@@ -443,12 +411,49 @@ handleReadSourceFilesMsg { model, moduleName, rsfMsg, isTooManyCmdsInFlight } =
                             Debug.log "\n\n\nFINISHED!" True
                     in
                         ( newModel, [] )
+
+        writeOutputFileCmd =
+            getWriteOutputFileCmd model3
     in
         ( model3, Cmd.batch [ readSourceFilesCmds2 |> Cmd.batch, writeOutputFileCmd ] )
 
 
 
 -- ( model3, Cmd.batch [ readSourceFilesCmds2 |> Cmd.batch ] )
+
+
+getWriteOutputFileCmd : Model -> Cmd Msg
+getWriteOutputFileCmd model =
+    let
+        _ =
+            Debug.log "writeOutputFileCmd" True
+    in
+        case isFinished model of
+            True ->
+                let
+                    _ =
+                        Debug.log "generating view functions" True
+
+                    simplifiedAllModuleInfos =
+                        simplifyAllModulesInfo model.allModulesInfo model.subjectModuleInfo
+
+                    _ =
+                        Debug.log "simplifiedAllModuleInfos" simplifiedAllModuleInfos
+
+                    output =
+                        generateViewFunctions
+                            { subjectModuleInfo = model.subjectModuleInfo
+                            , allModulesInfo = simplifiedAllModuleInfos
+                            }
+
+                    -- |> String.join "\n\n\n\n"
+                    _ =
+                        Debug.log "generated view functions" True
+                in
+                    writeOutput output
+
+            False ->
+                Cmd.none
 
 
 updateWithElmPackageInfoContentsResult : List ( String, String ) -> Model -> ( Model, Cmd Msg )
@@ -515,8 +520,14 @@ updateWithElmPackageInfoContentsResult tupleList model =
         --     Debug.log "externa;NamesModuleInfo" model.subjectModuleInfo.externalNamesModuleInfo
         _ =
             Debug.log "\n\n\nmodel" model
+
+        cmd =
+            if isFinished newModel then
+                getWriteOutputFileCmd newModel
+            else
+                readSourceFilesCmds |> Cmd.batch
     in
-        ( newModel, readSourceFilesCmds |> Cmd.batch )
+        ( newModel, cmd )
 
 
 updateAllModulesInfoForRsf :

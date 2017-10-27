@@ -13314,6 +13314,21 @@ var _user$project$Main$writeOutput = _elm_lang$core$Native_Platform.outgoingPort
 				return [v._0, v._1];
 			});
 	});
+var _user$project$Main$getWriteOutputFileCmd = function (model) {
+	var _p31 = A2(_elm_lang$core$Debug$log, 'writeOutputFileCmd', true);
+	var _p32 = _user$project$Main$isFinished(model);
+	if (_p32 === true) {
+		var _p33 = A2(_elm_lang$core$Debug$log, 'generated view functions', true);
+		var simplifiedAllModuleInfos = A2(_user$project$Main$simplifyAllModulesInfo, model.allModulesInfo, model.subjectModuleInfo);
+		var _p34 = A2(_elm_lang$core$Debug$log, 'simplifiedAllModuleInfos', simplifiedAllModuleInfos);
+		var output = _user$project$DataGeneration$generateViewFunctions(
+			{subjectModuleInfo: model.subjectModuleInfo, allModulesInfo: simplifiedAllModuleInfos});
+		var _p35 = A2(_elm_lang$core$Debug$log, 'generating view functions', true);
+		return _user$project$Main$writeOutput(output);
+	} else {
+		return _elm_lang$core$Platform_Cmd$none;
+	}
+};
 var _user$project$Main$exitApp = _elm_lang$core$Native_Platform.outgoingPort(
 	'exitApp',
 	function (v) {
@@ -13347,12 +13362,12 @@ var _user$project$Main$updateReadSourceFilesModel = F2(
 					rsfModel.moduleName,
 					_elm_lang$core$Maybe$map(
 						function (moduleInfo) {
-							var _p31 = moduleInfo.eitherModuleInfo;
-							if (_p31.ctor === 'Loaded') {
+							var _p36 = moduleInfo.eitherModuleInfo;
+							if (_p36.ctor === 'Loaded') {
 								return _elm_lang$core$Native_Utils.update(
 									moduleInfo,
 									{
-										eitherModuleInfo: _user$project$Main$Loaded(_p31._0)
+										eitherModuleInfo: _user$project$Main$Loaded(_p36._0)
 									});
 							} else {
 								return _elm_lang$core$Native_Utils.update(
@@ -13367,19 +13382,19 @@ var _user$project$Main$updateReadSourceFilesModel = F2(
 	});
 var _user$project$Main$updateAllModulesInfoForRsf = F4(
 	function (moduleName, rsfMsg, isTooManyCmdsInFlight, allModulesInfo) {
-		var _p32 = A3(_user$project$Helpers$unsafeDictGet, 'Main.elm line 312', moduleName, allModulesInfo);
-		var relevantNames = _p32.relevantNames;
-		var eitherModuleInfo = _p32.eitherModuleInfo;
-		var _p33 = eitherModuleInfo;
-		if (_p33.ctor === 'NotLoaded') {
-			var _p34 = A3(_user$project$ReadSourceFiles$update, rsfMsg, isTooManyCmdsInFlight, _p33._0);
-			var rsfModel = _p34.rsfModel;
-			var rsfGoal = _p34.rsfGoal;
-			var rsfCmds = _p34.rsfCmds;
-			var _p35 = rsfGoal;
-			if (_p35.ctor === 'Just') {
+		var _p37 = A3(_user$project$Helpers$unsafeDictGet, 'Main.elm line 312', moduleName, allModulesInfo);
+		var relevantNames = _p37.relevantNames;
+		var eitherModuleInfo = _p37.eitherModuleInfo;
+		var _p38 = eitherModuleInfo;
+		if (_p38.ctor === 'NotLoaded') {
+			var _p39 = A3(_user$project$ReadSourceFiles$update, rsfMsg, isTooManyCmdsInFlight, _p38._0);
+			var rsfModel = _p39.rsfModel;
+			var rsfGoal = _p39.rsfGoal;
+			var rsfCmds = _p39.rsfCmds;
+			var _p40 = rsfGoal;
+			if (_p40.ctor === 'Just') {
 				var moduleInfo = _user$project$DependentModules$getModuleInfo(
-					{sourceCode: _p35._0, relevantNames: relevantNames});
+					{sourceCode: _p40._0, relevantNames: relevantNames});
 				var newExternalModules = _user$project$ModuleInfo$groupNamesByModule(moduleInfo.externalNamesModuleInfo);
 				return {
 					newAllModulesInfo: A3(
@@ -13424,18 +13439,18 @@ var _user$project$Main$ReadSourceFilesMsg = F2(
 	});
 var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 	function (tupleList, model) {
-		var _p36 = A2(_elm_lang$core$Debug$log, '\n\n\nmodel', model);
+		var _p41 = A2(_elm_lang$core$Debug$log, '\n\n\nmodel', model);
 		var packageSourceDirectories = A2(
 			_elm_lang$core$List$concatMap,
-			function (_p37) {
-				var _p38 = _p37;
+			function (_p42) {
+				var _p43 = _p42;
 				return A2(
 					_elm_lang$core$List$map,
 					function (relativeSourceDirectory) {
 						return _ucode$elm_path$Path_Posix$joinPath(
 							{
 								ctor: '::',
-								_0: _ucode$elm_path$Path_Posix$dropFileName(_p38._0),
+								_0: _ucode$elm_path$Path_Posix$dropFileName(_p43._0),
 								_1: {
 									ctor: '::',
 									_0: relativeSourceDirectory,
@@ -13447,11 +13462,11 @@ var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 						return _.sourceDirectories;
 					}(
 						_user$project$Helpers$unsafeAssumeSuccess(
-							A2(_elm_lang$core$Json_Decode$decodeString, _user$project$PackageInfo$decoder, _p38._1))));
+							A2(_elm_lang$core$Json_Decode$decodeString, _user$project$PackageInfo$decoder, _p43._1))));
 			},
 			tupleList);
 		var allSourceDirectories = A2(_elm_lang$core$Basics_ops['++'], model.sourceDirectories, packageSourceDirectories);
-		var _p39 = A2(
+		var _p44 = A2(
 			_elm_lang$core$Tuple$mapSecond,
 			_elm_lang$core$List$concat,
 			A2(
@@ -13460,78 +13475,75 @@ var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 				_elm_lang$core$List$unzip(
 					A2(
 						_elm_lang$core$List$map,
-						function (_p40) {
-							var _p41 = _p40;
-							var _p43 = _p41.moduleName;
-							var _p42 = _user$project$ReadSourceFiles$init(
-								{sourceDirectories: allSourceDirectories, moduleName: _p43});
-							var rsfModel = _p42._0;
-							var rsfCmds = _p42._1;
+						function (_p45) {
+							var _p46 = _p45;
+							var _p48 = _p46.moduleName;
+							var _p47 = _user$project$ReadSourceFiles$init(
+								{sourceDirectories: allSourceDirectories, moduleName: _p48});
+							var rsfModel = _p47._0;
+							var rsfCmds = _p47._1;
 							return {
 								ctor: '_Tuple2',
 								_0: {
 									ctor: '_Tuple2',
-									_0: _p43,
+									_0: _p48,
 									_1: {
-										relevantNames: _p41.relevantNames,
+										relevantNames: _p46.relevantNames,
 										eitherModuleInfo: _user$project$Main$NotLoaded(rsfModel)
 									}
 								},
 								_1: A2(
 									_elm_lang$core$List$map,
 									_elm_lang$core$Platform_Cmd$map(
-										_user$project$Main$ReadSourceFilesMsg(_p43)),
+										_user$project$Main$ReadSourceFilesMsg(_p48)),
 									rsfCmds)
 							};
 						},
 						_user$project$ModuleInfo$groupNamesByModule(model.subjectModuleInfo.externalNamesModuleInfo)))));
-		var allModulesInfo = _p39._0;
-		var readSourceFilesCmds = _p39._1;
+		var allModulesInfo = _p44._0;
+		var readSourceFilesCmds = _p44._1;
 		var newModel = _elm_lang$core$Native_Utils.update(
 			model,
 			{packageSourceDirectoriesFound: true, sourceDirectories: allSourceDirectories, allModulesInfo: allModulesInfo});
-		return {
-			ctor: '_Tuple2',
-			_0: newModel,
-			_1: _elm_lang$core$Platform_Cmd$batch(readSourceFilesCmds)
-		};
+		var cmd = _user$project$Main$isFinished(newModel) ? _user$project$Main$getWriteOutputFileCmd(newModel) : _elm_lang$core$Platform_Cmd$batch(readSourceFilesCmds);
+		return {ctor: '_Tuple2', _0: newModel, _1: cmd};
 	});
 var _user$project$Main$addNewExternalModules = F3(
 	function (sourceDirectories, allModulesInfo, newExternalModules) {
-		return function (_p44) {
-			var _p45 = _p44;
-			return {ctor: '_Tuple2', _0: _p45.accAllModulesInfo, _1: _p45.accCmds};
+		return function (_p49) {
+			var _p50 = _p49;
+			return {ctor: '_Tuple2', _0: _p50.accAllModulesInfo, _1: _p50.accCmds};
 		}(
 			A3(
 				_elm_lang$core$List$foldl,
 				F2(
-					function (_p47, _p46) {
-						var _p48 = _p47;
-						var _p52 = _p48.moduleName;
-						var _p49 = _p46;
-						var _p50 = A2(_elm_lang$core$Dict$get, _p52, allModulesInfo);
-						if (_p50.ctor === 'Just') {
-							return _p49;
+					function (_p52, _p51) {
+						var _p53 = _p52;
+						var _p57 = _p53.moduleName;
+						var _p54 = _p51;
+						var _p55 = A2(_elm_lang$core$Dict$get, _p57, allModulesInfo);
+						if (_p55.ctor === 'Just') {
+							return _p54;
 						} else {
-							var _p51 = _user$project$ReadSourceFiles$init(
-								{sourceDirectories: sourceDirectories, moduleName: _p52});
-							var rsfModel = _p51._0;
-							var rsfCmds = _p51._1;
+							var _p56 = _user$project$ReadSourceFiles$init(
+								{sourceDirectories: sourceDirectories, moduleName: _p57});
+							var rsfModel = _p56._0;
+							var rsfCmds = _p56._1;
 							var mappedCmds = A2(
 								_elm_lang$core$List$map,
 								_elm_lang$core$Platform_Cmd$map(
-									_user$project$Main$ReadSourceFilesMsg(_p52)),
+									_user$project$Main$ReadSourceFilesMsg(_p57)),
 								rsfCmds);
 							return {
 								accAllModulesInfo: A3(
 									_elm_lang$core$Dict$insert,
-									_p52,
+									_p57,
 									{
-										relevantNames: _p48.relevantNames,
+										relevantNames: _p53.relevantNames,
 										eitherModuleInfo: _user$project$Main$NotLoaded(rsfModel)
 									},
-									_p49.accAllModulesInfo),
-								accCmds: A2(_elm_lang$core$Basics_ops['++'], _p49.accCmds, mappedCmds)
+									_p54.accAllModulesInfo),
+								accCmds: A2(_elm_lang$core$Basics_ops['++'], _p54.accCmds, mappedCmds)
 							};
 						}
 					}),
@@ -13543,9 +13555,9 @@ var _user$project$Main$addNewExternalModules = F3(
 	});
 var _user$project$Main$readSourceFilesSubscription = A2(
 	_elm_lang$core$Platform_Sub$map,
-	function (_p53) {
-		var _p54 = _p53;
-		return A2(_user$project$Main$ReadSourceFilesMsg, _p54._0, _p54._1);
+	function (_p58) {
+		var _p59 = _p58;
+		return A2(_user$project$Main$ReadSourceFilesMsg, _p59._0, _p59._1);
 	},
 	_user$project$ReadSourceFiles$subscription);
 var _user$project$Main$Abort = {ctor: 'Abort'};
@@ -13577,24 +13589,24 @@ var _user$project$Main$Doing = {ctor: 'Doing'};
 var _user$project$Main$Failed = {ctor: 'Failed'};
 var _user$project$Main$Finished = {ctor: 'Finished'};
 var _user$project$Main$getCurrentProgressState = function (model) {
-	var _p55 = _user$project$Main$classifyLoads(model);
-	var inFlight = _p55.inFlight;
-	var loaded = _p55.loaded;
-	var failed = _p55.failed;
+	var _p60 = _user$project$Main$classifyLoads(model);
+	var inFlight = _p60.inFlight;
+	var loaded = _p60.loaded;
+	var failed = _p60.failed;
 	return (!_elm_lang$core$List$isEmpty(failed)) ? _user$project$Main$Failed : ((!_elm_lang$core$List$isEmpty(inFlight)) ? _user$project$Main$Doing : _user$project$Main$Finished);
 };
-var _user$project$Main$handleReadSourceFilesMsg = function (_p56) {
-	var _p57 = _p56;
-	var _p74 = _p57.moduleName;
-	var _p73 = _p57.model;
-	var _p58 = function () {
-		var _p59 = A4(_user$project$Main$updateAllModulesInfoForRsf, _p74, _p57.rsfMsg, _p57.isTooManyCmdsInFlight, _p73.allModulesInfo);
-		var newAllModulesInfo = _p59.newAllModulesInfo;
-		var newExternalModules = _p59.newExternalModules;
-		var rsfCmds = _p59.rsfCmds;
-		var _p60 = A3(_user$project$Main$addNewExternalModules, _p73.sourceDirectories, newAllModulesInfo, newExternalModules);
-		var allModulesInfo2 = _p60._0;
-		var newExtModulesCmds = _p60._1;
+var _user$project$Main$handleReadSourceFilesMsg = function (_p61) {
+	var _p62 = _p61;
+	var _p74 = _p62.moduleName;
+	var _p73 = _p62.model;
+	var _p63 = function () {
+		var _p64 = A4(_user$project$Main$updateAllModulesInfoForRsf, _p74, _p62.rsfMsg, _p62.isTooManyCmdsInFlight, _p73.allModulesInfo);
+		var newAllModulesInfo = _p64.newAllModulesInfo;
+		var newExternalModules = _p64.newExternalModules;
+		var rsfCmds = _p64.rsfCmds;
+		var _p65 = A3(_user$project$Main$addNewExternalModules, _p73.sourceDirectories, newAllModulesInfo, newExternalModules);
+		var allModulesInfo2 = _p65._0;
+		var newExtModulesCmds = _p65._1;
 		return {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Native_Utils.update(
@@ -13610,35 +13622,19 @@ var _user$project$Main$handleReadSourceFilesMsg = function (_p56) {
 				newExtModulesCmds)
 		};
 	}();
-	var newModel = _p58._0;
-	var readSourceFilesCmds = _p58._1;
-	var writeOutputFileCmd = function () {
-		var _p61 = A2(_elm_lang$core$Debug$log, 'writeOutputFileCmd', true);
-		var _p62 = _user$project$Main$isFinished(newModel);
-		if (_p62 === true) {
-			var _p63 = A2(_elm_lang$core$Debug$log, 'generated view functions', true);
-			var simplifiedAllModuleInfos = A2(_user$project$Main$simplifyAllModulesInfo, newModel.allModulesInfo, newModel.subjectModuleInfo);
-			var _p64 = A2(_elm_lang$core$Debug$log, 'simplifiedAllModuleInfos', simplifiedAllModuleInfos);
-			var output = _user$project$DataGeneration$generateViewFunctions(
-				{subjectModuleInfo: newModel.subjectModuleInfo, allModulesInfo: simplifiedAllModuleInfos});
-			var _p65 = A2(_elm_lang$core$Debug$log, 'generating view functions', true);
-			return _user$project$Main$writeOutput(output);
-		} else {
-			return _elm_lang$core$Platform_Cmd$none;
-		}
-	}();
-	var _p66 = A2(_elm_lang$core$Debug$log, 'writeOutputFileCmd', writeOutputFileCmd);
-	var _p67 = A2(
+	var newModel = _p63._0;
+	var readSourceFilesCmds = _p63._1;
+	var _p66 = A2(
 		_elm_lang$core$Debug$log,
 		'\n\nmodule load status',
 		_user$project$Main$classifyLoads(newModel));
-	var _p68 = A2(
+	var _p67 = A2(
 		_elm_lang$core$Debug$log,
 		'\n\nisFinished?',
 		_user$project$Main$isFinished(newModel));
-	var _p69 = function () {
-		var _p70 = _user$project$Main$getCurrentProgressState(newModel);
-		switch (_p70.ctor) {
+	var _p68 = function () {
+		var _p69 = _user$project$Main$getCurrentProgressState(newModel);
+		switch (_p69.ctor) {
 			case 'Failed':
 				return {
 					ctor: '_Tuple2',
@@ -13659,11 +13655,11 @@ var _user$project$Main$handleReadSourceFilesMsg = function (_p56) {
 							_user$project$Main$updateReadSourceFilesModel(newModel),
 							_user$project$ReadSourceFiles$kickBackIntoAction(rsfModel)));
 				} else {
-					var _p71 = A2(_elm_lang$core$Debug$log, '\n\n\nTHERE ARE STILL CMDS', true);
+					var _p70 = A2(_elm_lang$core$Debug$log, '\n\n\nTHERE ARE STILL CMDS', true);
 					return {ctor: '_Tuple2', _0: newModel, _1: readSourceFilesCmds};
 				}
 			default:
-				var _p72 = A2(_elm_lang$core$Debug$log, '\n\n\nFINISHED!', true);
+				var _p71 = A2(_elm_lang$core$Debug$log, '\n\n\nFINISHED!', true);
 				return {
 					ctor: '_Tuple2',
 					_0: newModel,
@@ -13671,8 +13667,10 @@ var _user$project$Main$handleReadSourceFilesMsg = function (_p56) {
 				};
 		}
 	}();
-	var model3 = _p69._0;
-	var readSourceFilesCmds2 = _p69._1;
+	var model3 = _p68._0;
+	var readSourceFilesCmds2 = _p68._1;
+	var writeOutputFileCmd = _user$project$Main$getWriteOutputFileCmd(model3);
+	var _p72 = A2(_elm_lang$core$Debug$log, 'writeOutputFileCmd', writeOutputFileCmd);
 	return {
 		ctor: '_Tuple2',
 		_0: model3,
