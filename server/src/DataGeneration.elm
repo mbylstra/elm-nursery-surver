@@ -61,9 +61,17 @@ generateViewFunction allTypes dottedModulePath ( functionName, functionType ) =
                 in
                     ( functionName, code )
 
-            -- this is so that elm format makes things nicer
             _ ->
-                Debug.crash "We are only dealing with functions that take args at the moment"
+                let
+                    code =
+                        imports
+                            ++ "\nstaticView = "
+                            |> String.Extra.replace ", " ",\n"
+                            |> wrapInHtmlProgram
+
+                in
+                    ( functionName, code )
+
 
 
 lambdaToList : QualifiedType -> QualifiedType -> List QualifiedType
