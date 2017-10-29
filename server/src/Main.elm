@@ -27,7 +27,7 @@ port readElmPackageInfoContents : List String -> Cmd msg
 port readElmPackageInfoContentsResult : (List ( String, String ) -> msg) -> Sub msg
 
 
-port writeOutput : List ( String, String ) -> Cmd msg
+port writeOutput : List String -> Cmd msg
 
 
 port exitApp : Float -> Cmd msg
@@ -344,8 +344,41 @@ handleReadSourceFilesMsg { model, moduleName, rsfMsg, isTooManyCmdsInFlight } =
                     ++ newExtModulesCmds
                 )
 
-        _ =
-            Debug.log "writeOutputFileCmd" writeOutputFileCmd
+        -- _ =
+        --     Debug.log "writeOutputFileCmd" writeOutputFileCmd
+
+        -- writeOutputFileCmd =
+        --     let
+        --         _ =
+        --             Debug.log "writeOutputFileCmd" True
+        --     in
+        --         case isFinished newModel of
+        --             True ->
+        --                 let
+        --                     _ =
+        --                         Debug.log "generating view functions" True
+        --
+        --                     simplifiedAllModuleInfos =
+        --                         simplifyAllModulesInfo newModel.allModulesInfo newModel.subjectModuleInfo
+        --
+        --                     _ =
+        --                         Debug.log "simplifiedAllModuleInfos" simplifiedAllModuleInfos
+        --
+        --                     output : List String
+        --                     output =
+        --                         generateViewFunctions
+        --                             { subjectModuleInfo = newModel.subjectModuleInfo
+        --                             , allModulesInfo = simplifiedAllModuleInfos
+        --                             }
+        --
+        --                     -- |> String.join "\n\n\n\n"
+        --                     _ =
+        --                         Debug.log "generated view functions" True
+        --                 in
+        --                     writeOutput output
+        --
+        --             False ->
+        --                 Cmd.none
 
         -- _ =
         --     case isFinished newModel of
@@ -376,11 +409,11 @@ handleReadSourceFilesMsg { model, moduleName, rsfMsg, isTooManyCmdsInFlight } =
         --             []
         -- _ =
         --     Debug.log "\n\nfailedLoads" (getFailedLoads newModel)
-        _ =
-            Debug.log "\n\nmodule load status" (classifyLoads newModel)
+        -- _ =
+        --     Debug.log "\n\nmodule load status" (classifyLoads newModel)
 
-        _ =
-            Debug.log "\n\nisFinished?" (isFinished newModel)
+        -- _ =
+        --     Debug.log "\n\nisFinished?" (isFinished newModel)
 
         ( model3, readSourceFilesCmds2 ) =
             case getCurrentProgressState newModel of
@@ -399,17 +432,17 @@ handleReadSourceFilesMsg { model, moduleName, rsfMsg, isTooManyCmdsInFlight } =
                                 |> Tuple.mapSecond (List.map <| Cmd.map <| ReadSourceFilesMsg rsfModel.moduleName)
                         -- TODO: generate new comds!
                     else
-                        let
-                            _ =
-                                Debug.log "\n\n\nTHERE ARE STILL CMDS" True
-                        in
+                        -- let
+                            -- _ =
+                            --     Debug.log "\n\n\nTHERE ARE STILL CMDS" True
+                        -- in
                             ( newModel, readSourceFilesCmds )
 
                 Finished ->
-                    let
-                        _ =
-                            Debug.log "\n\n\nFINISHED!" True
-                    in
+                    -- let
+                        -- _ =
+                        --     Debug.log "\n\n\nFINISHED!" True
+                    -- in
                         ( newModel, [] )
 
         writeOutputFileCmd =
@@ -424,21 +457,21 @@ handleReadSourceFilesMsg { model, moduleName, rsfMsg, isTooManyCmdsInFlight } =
 
 getWriteOutputFileCmd : Model -> Cmd Msg
 getWriteOutputFileCmd model =
-    let
-        _ =
-            Debug.log "writeOutputFileCmd" True
-    in
+    -- let
+    --     _ =
+    --         Debug.log "writeOutputFileCmd" True
+    -- in
         case isFinished model of
             True ->
                 let
-                    _ =
-                        Debug.log "generating view functions" True
+                    -- _ =
+                    --     Debug.log "generating view functions" True
 
                     simplifiedAllModuleInfos =
                         simplifyAllModulesInfo model.allModulesInfo model.subjectModuleInfo
 
-                    _ =
-                        Debug.log "simplifiedAllModuleInfos" simplifiedAllModuleInfos
+                    -- _ =
+                    --     Debug.log "simplifiedAllModuleInfos" simplifiedAllModuleInfos
 
                     output =
                         generateViewFunctions
@@ -447,8 +480,8 @@ getWriteOutputFileCmd model =
                             }
 
                     -- |> String.join "\n\n\n\n"
-                    _ =
-                        Debug.log "generated view functions" True
+                    -- _ =
+                    --     Debug.log "generated view functions" True
                 in
                     writeOutput output
 
@@ -518,8 +551,8 @@ updateWithElmPackageInfoContentsResult tupleList model =
         --     Debug.log "allSourceDirectories" allSourceDirectories
         -- _ =
         --     Debug.log "externa;NamesModuleInfo" model.subjectModuleInfo.externalNamesModuleInfo
-        _ =
-            Debug.log "\n\n\nmodel" model
+        -- _ =
+        --     Debug.log "\n\n\nmodel" model
 
         cmd =
             if isFinished newModel then

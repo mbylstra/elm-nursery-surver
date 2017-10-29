@@ -10029,6 +10029,49 @@ var _ucode$elm_path$Path_Posix$hasTrailingPathSeparator = _ucode$elm_path$Path_G
 var _ucode$elm_path$Path_Posix$addTrailingPathSeparator = _ucode$elm_path$Path_Generic$addTrailingPathSeparator(_ucode$elm_path$Path_Posix$currPlatform);
 var _ucode$elm_path$Path_Posix$dropTrailingPathSeparator = _ucode$elm_path$Path_Generic$dropTrailingPathSeparator(_ucode$elm_path$Path_Posix$currPlatform);
 
+var _user$project$Combinations$foldFunction = F2(
+	function (inputList, outputLists) {
+		return _elm_lang$core$List$concat(
+			A2(
+				_elm_lang$core$List$map,
+				function (inputElement) {
+					return A2(
+						_elm_lang$core$List$map,
+						function (outputList) {
+							return A2(
+								_elm_lang$core$Basics_ops['++'],
+								outputList,
+								{
+									ctor: '::',
+									_0: inputElement,
+									_1: {ctor: '[]'}
+								});
+						},
+						outputLists);
+				},
+				inputList));
+	});
+var _user$project$Combinations$combinations = function (inputLists) {
+	var _p0 = inputLists;
+	if (_p0.ctor === '[]') {
+		return {ctor: '[]'};
+	} else {
+		if (_p0._1.ctor === '[]') {
+			return {
+				ctor: '::',
+				_0: _p0._0,
+				_1: {ctor: '[]'}
+			};
+		} else {
+			return A3(
+				_elm_lang$core$List$foldl,
+				_user$project$Combinations$foldFunction,
+				A2(_elm_lang$core$List$map, _elm_lang$core$List$singleton, _p0._0),
+				_p0._1);
+		}
+	}
+};
+
 var _user$project$Helpers$unsafeListHead = function (xs) {
 	var _p0 = _elm_lang$core$List$head(xs);
 	if (_p0.ctor === 'Just') {
@@ -11719,15 +11762,246 @@ var _user$project$DataGeneration$coreDifficultTypes = {
 		_1: {ctor: '[]'}
 	}
 };
+var _user$project$DataGeneration$generateData = F3(
+	function (_p0, instantiatedTypeVars, tipe) {
+		generateData:
+		while (true) {
+			var _p1 = _p0;
+			var _p10 = _p1;
+			var _p2 = tipe;
+			switch (_p2.ctor) {
+				case 'QualifiedVar':
+					var _p3 = _elm_lang$core$List$head(instantiatedTypeVars);
+					if (_p3.ctor === 'Just') {
+						var _p5 = _p3._0;
+						var _p4 = _p5;
+						if (_p4.ctor === 'QualifiedVar') {
+							return {
+								ctor: '::',
+								_0: '\"String was chosen for wildcard type\"',
+								_1: {ctor: '[]'}
+							};
+						} else {
+							var _v4 = _p10,
+								_v5 = instantiatedTypeVars,
+								_v6 = A2(_elm_lang$core$Debug$log, 'instantiatedType', _p5);
+							_p0 = _v4;
+							instantiatedTypeVars = _v5;
+							tipe = _v6;
+							continue generateData;
+						}
+					} else {
+						return {
+							ctor: '::',
+							_0: '\"String was chosen for wildcard type\"',
+							_1: {ctor: '[]'}
+						};
+					}
+				case 'QualifiedType':
+					var _p8 = _p2._1;
+					var _p6 = _p2._0.name;
+					switch (_p6) {
+						case 'Int':
+							return {
+								ctor: '::',
+								_0: '0',
+								_1: {
+									ctor: '::',
+									_0: '1',
+									_1: {
+										ctor: '::',
+										_0: '2',
+										_1: {ctor: '[]'}
+									}
+								}
+							};
+						case 'String':
+							return {
+								ctor: '::',
+								_0: '\"hello\"',
+								_1: {
+									ctor: '::',
+									_0: '\"A medium length string\"',
+									_1: {
+										ctor: '::',
+										_0: '\"A very very very, I mean really, really, not joking, looonnnnngggggg string\"',
+										_1: {ctor: '[]'}
+									}
+								}
+							};
+						case 'Bool':
+							return {
+								ctor: '::',
+								_0: 'True',
+								_1: {
+									ctor: '::',
+									_0: 'False',
+									_1: {ctor: '[]'}
+								}
+							};
+						case 'Float':
+							return {
+								ctor: '::',
+								_0: '1.0',
+								_1: {
+									ctor: '::',
+									_0: '0.0',
+									_1: {
+										ctor: '::',
+										_0: '-1.0',
+										_1: {ctor: '[]'}
+									}
+								}
+							};
+						case 'Html':
+							return {
+								ctor: '::',
+								_0: '(Html.text \"hello\")',
+								_1: {ctor: '[]'}
+							};
+						case 'List':
+							var listType = _user$project$Helpers$unsafeListHead(_p8);
+							var singleOptions = A3(_user$project$DataGeneration$generateData, _p10, instantiatedTypeVars, listType);
+							return A2(
+								_elm_lang$core$List$map,
+								function (option) {
+									return A2(
+										_elm_lang$core$Basics_ops['++'],
+										'[',
+										A2(_elm_lang$core$Basics_ops['++'], option, ']'));
+								},
+								singleOptions);
+						case 'Set':
+							var listType = _user$project$Helpers$unsafeListHead(_p8);
+							var singleOptions = A3(_user$project$DataGeneration$generateData, _p10, instantiatedTypeVars, listType);
+							return A2(
+								_elm_lang$core$List$map,
+								function (option) {
+									return A2(
+										_elm_lang$core$Basics_ops['++'],
+										'Set.fromList [',
+										A2(_elm_lang$core$Basics_ops['++'], option, ']'));
+								},
+								singleOptions);
+						case 'Date':
+							return {
+								ctor: '::',
+								_0: 'Date.fromTime 1506233184',
+								_1: {ctor: '[]'}
+							};
+						case 'DatePicker':
+							return {
+								ctor: '::',
+								_0: 'DatePicker.initFromDate (Date.fromTime 1506233184)',
+								_1: {ctor: '[]'}
+							};
+						default:
+							var _p7 = 1;
+							return A3(_user$project$DataGeneration$substituteType, _p10, _p2._0, _p8);
+					}
+				default:
+					return _elm_lang$core$Native_Utils.crashCase(
+						'DataGeneration',
+						{
+							start: {line: 115, column: 5},
+							end: {line: 203, column: 77}
+						},
+						_p2)('This is type that\'s in the too hard basket for now');
+			}
+		}
+	});
+var _user$project$DataGeneration$substituteType = F3(
+	function (_p12, _p11, instantiatedTypeVars) {
+		var _p13 = _p12;
+		var _p21 = _p13;
+		var _p14 = _p11;
+		var _p20 = _p14;
+		var _p19 = _p14.name;
+		var _p18 = _p14.dottedModulePath;
+		if (A2(_elm_lang$core$List$member, _p20, _user$project$DataGeneration$coreDifficultTypes)) {
+			return {
+				ctor: '::',
+				_0: '(TOO HARD BASKET)',
+				_1: {ctor: '[]'}
+			};
+		} else {
+			var subjectModuleInfo = A3(_user$project$Helpers$unsafeDictGet, 'DataGeneration.elm 129', _p18, _p13.allModulesInfo);
+			var _p15 = A2(_elm_lang$core$Dict$get, _p19, subjectModuleInfo.typeAliases);
+			if (_p15.ctor === 'Just') {
+				return A3(_user$project$DataGeneration$generateData, _p21, instantiatedTypeVars, _p15._0);
+			} else {
+				var _p16 = A2(_elm_lang$core$Dict$get, _p19, subjectModuleInfo.unionTypes);
+				if (_p16.ctor === 'Just') {
+					return A4(_user$project$DataGeneration$generateFromUnionType, _p21, _p18, instantiatedTypeVars, _p16._0);
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'DataGeneration',
+						{
+							start: {line: 292, column: 21},
+							end: {line: 297, column: 86}
+						},
+						_p16)(
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'could not find ',
+							_elm_lang$core$Basics$toString(_p20)));
+				}
+			}
+		}
+	});
+var _user$project$DataGeneration$generateFromUnionType = F4(
+	function (allTypes, dottedModulePath, instantiatedTypeVars, _p22) {
+		var _p23 = _p22;
+		var firstConstructor = _user$project$Helpers$unsafeListHead(_p23.definition);
+		return A4(_user$project$DataGeneration$generateFromTypeConstructor, allTypes, dottedModulePath, instantiatedTypeVars, firstConstructor);
+	});
+var _user$project$DataGeneration$generateFromTypeConstructor = F4(
+	function (allTypes, dottedModulePath, instantiateTypeVars, _p24) {
+		var _p25 = _p24;
+		var argListToString = function (argList) {
+			return A2(_elm_lang$core$String$join, ' ', argList);
+		};
+		var generateArg = function (tipe) {
+			return A2(
+				_elm_lang$core$List$map,
+				function (code) {
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						' ( ',
+						A2(_elm_lang$core$Basics_ops['++'], code, ' ) '));
+				},
+				A3(_user$project$DataGeneration$generateData, allTypes, instantiateTypeVars, tipe));
+		};
+		var argsCombinations = _user$project$Combinations$combinations(
+			A2(_elm_lang$core$List$map, generateArg, _p25._1));
+		return A2(
+			_elm_lang$core$List$map,
+			function (argList) {
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					dottedModulePath,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'.',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_p25._0,
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' ',
+								argListToString(argList)))));
+			},
+			argsCombinations);
+	});
 var _user$project$DataGeneration$lambdaToList = F2(
 	function (leftType, rightType) {
 		return {
 			ctor: '::',
 			_0: leftType,
 			_1: function () {
-				var _p0 = rightType;
-				if (_p0.ctor === 'QualifiedLambda') {
-					return A2(_user$project$DataGeneration$lambdaToList, _p0._0, _p0._1);
+				var _p26 = rightType;
+				if (_p26.ctor === 'QualifiedLambda') {
+					return A2(_user$project$DataGeneration$lambdaToList, _p26._0, _p26._1);
 				} else {
 					return {
 						ctor: '::',
@@ -11738,228 +12012,9 @@ var _user$project$DataGeneration$lambdaToList = F2(
 			}()
 		};
 	});
-var _user$project$DataGeneration$generateLambda = F4(
-	function (allTypes, instantiatedTypeVars, leftType, rightType) {
-		return function (argsList) {
-			var _p1 = argsList;
-			if (_p1.ctor === '[]') {
-				return _elm_lang$core$Native_Utils.crashCase(
-					'DataGeneration',
-					{
-						start: {line: 170, column: 17},
-						end: {line: 185, column: 123}
-					},
-					_p1)('this shouldn\'t be possible');
-			} else {
-				if (_p1._1.ctor === '[]') {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'DataGeneration',
-						{
-							start: {line: 170, column: 17},
-							end: {line: 185, column: 123}
-						},
-						_p1)('this shouldn\'t be possible');
-				} else {
-					var returnedValue = A3(_user$project$DataGeneration$generateData, allTypes, instantiatedTypeVars, _p1._0);
-					var numIgnoredArgs = 1 + _elm_lang$core$List$length(_p1._1._1);
-					return A2(
-						_elm_lang$core$Basics_ops['++'],
-						'(\\',
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							A2(
-								_elm_lang$core$String$join,
-								' ',
-								A2(_elm_lang$core$List$repeat, numIgnoredArgs, '_')),
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								' -> ',
-								A2(_elm_lang$core$Basics_ops['++'], returnedValue, ')'))));
-				}
-			}
-		}(
-			_elm_lang$core$List$reverse(
-				A2(_user$project$DataGeneration$lambdaToList, leftType, rightType)));
-	});
-var _user$project$DataGeneration$generateData = F3(
-	function (_p4, instantiatedTypeVars, tipe) {
-		generateData:
-		while (true) {
-			var _p5 = _p4;
-			var _p15 = _p5;
-			var _p6 = tipe;
-			switch (_p6.ctor) {
-				case 'QualifiedVar':
-					var _p7 = _elm_lang$core$List$head(instantiatedTypeVars);
-					if (_p7.ctor === 'Just') {
-						var _p9 = _p7._0;
-						var _p8 = _p9;
-						if (_p8.ctor === 'QualifiedVar') {
-							return '\"String was chosen for wildcard type\"';
-						} else {
-							var _v6 = _p15,
-								_v7 = instantiatedTypeVars,
-								_v8 = A2(_elm_lang$core$Debug$log, 'instantiatedType', _p9);
-							_p4 = _v6;
-							instantiatedTypeVars = _v7;
-							tipe = _v8;
-							continue generateData;
-						}
-					} else {
-						return '\"String was chosen for wildcard type\"';
-					}
-				case 'QualifiedLambda':
-					return A4(_user$project$DataGeneration$generateLambda, _p15, instantiatedTypeVars, _p6._0, _p6._1);
-				case 'QualifiedTuple':
-					return A2(
-						_elm_lang$core$Basics_ops['++'],
-						'(',
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							A2(
-								_elm_lang$core$String$join,
-								', ',
-								A2(
-									_elm_lang$core$List$map,
-									A2(_user$project$DataGeneration$generateData, _p15, instantiatedTypeVars),
-									_p6._0)),
-							')'));
-				case 'QualifiedType':
-					var _p12 = _p6._1;
-					var _p10 = _p6._0.name;
-					switch (_p10) {
-						case 'Int':
-							return '1';
-						case 'String':
-							return '\"a string\"';
-						case 'Bool':
-							return 'True';
-						case 'Float':
-							return '1.0';
-						case 'Html':
-							return '(Html.text \"hello\")';
-						case 'List':
-							var listType = _user$project$Helpers$unsafeListHead(_p12);
-							return A2(
-								_elm_lang$core$Basics_ops['++'],
-								'[',
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									A3(_user$project$DataGeneration$generateData, _p15, instantiatedTypeVars, listType),
-									']'));
-						case 'Set':
-							var listType = _user$project$Helpers$unsafeListHead(_p12);
-							return A2(
-								_elm_lang$core$Basics_ops['++'],
-								'Set.fromList [',
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									A3(_user$project$DataGeneration$generateData, _p15, instantiatedTypeVars, listType),
-									']'));
-						case 'Date':
-							return 'Date.fromTime 1506233184';
-						case 'DatePicker':
-							return 'DatePicker.initFromDate (Date.fromTime 1506233184)';
-						default:
-							var _p11 = 1;
-							return A3(_user$project$DataGeneration$substituteType, _p15, _p6._0, _p12);
-					}
-				default:
-					var generateFieldData = function (_p13) {
-						var _p14 = _p13;
-						return A2(
-							_elm_lang$core$Basics_ops['++'],
-							_p14._0,
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								' = ',
-								A3(_user$project$DataGeneration$generateData, _p15, instantiatedTypeVars, _p14._1)));
-					};
-					return A2(
-						_elm_lang$core$Basics_ops['++'],
-						'{',
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							A2(
-								_elm_lang$core$String$join,
-								', ',
-								A2(_elm_lang$core$List$map, generateFieldData, _p6._0)),
-							'}'));
-			}
-		}
-	});
-var _user$project$DataGeneration$substituteType = F3(
-	function (_p17, _p16, instantiatedTypeVars) {
-		var _p18 = _p17;
-		var _p26 = _p18;
-		var _p19 = _p16;
-		var _p25 = _p19;
-		var _p24 = _p19.name;
-		var _p23 = _p19.dottedModulePath;
-		if (A2(_elm_lang$core$List$member, _p25, _user$project$DataGeneration$coreDifficultTypes)) {
-			return '(TOO HARD BASKET)';
-		} else {
-			var subjectModuleInfo = A3(_user$project$Helpers$unsafeDictGet, 'DataGeneration.elm 129', _p23, _p18.allModulesInfo);
-			var _p20 = A2(_elm_lang$core$Dict$get, _p24, subjectModuleInfo.typeAliases);
-			if (_p20.ctor === 'Just') {
-				return A3(_user$project$DataGeneration$generateData, _p26, instantiatedTypeVars, _p20._0);
-			} else {
-				var _p21 = A2(_elm_lang$core$Dict$get, _p24, subjectModuleInfo.unionTypes);
-				if (_p21.ctor === 'Just') {
-					return A4(_user$project$DataGeneration$generateFromUnionType, _p26, _p23, instantiatedTypeVars, _p21._0);
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'DataGeneration',
-						{
-							start: {line: 236, column: 21},
-							end: {line: 241, column: 86}
-						},
-						_p21)(
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'could not find ',
-							_elm_lang$core$Basics$toString(_p25)));
-				}
-			}
-		}
-	});
-var _user$project$DataGeneration$generateFromUnionType = F4(
-	function (allTypes, dottedModulePath, instantiatedTypeVars, _p27) {
-		var _p28 = _p27;
-		var firstConstructor = _user$project$Helpers$unsafeListHead(_p28.definition);
-		return A4(_user$project$DataGeneration$generateFromTypeConstructor, allTypes, dottedModulePath, instantiatedTypeVars, firstConstructor);
-	});
-var _user$project$DataGeneration$generateFromTypeConstructor = F4(
-	function (allTypes, dottedModulePath, instantiateTypeVars, _p29) {
-		var _p30 = _p29;
-		var generateArg = function (tipe) {
-			return A2(
-				_elm_lang$core$Basics_ops['++'],
-				' ( ',
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					A3(_user$project$DataGeneration$generateData, allTypes, instantiateTypeVars, tipe),
-					' ) '));
-		};
-		var argsString = A2(
-			_elm_lang$core$String$join,
-			' ',
-			A2(_elm_lang$core$List$map, generateArg, _p30._1));
-		return A2(
-			_elm_lang$core$Basics_ops['++'],
-			dottedModulePath,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				'.',
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					_p30._0,
-					A2(_elm_lang$core$Basics_ops['++'], ' ', argsString))));
-	});
 var _user$project$DataGeneration$generateViewFunction = F3(
-	function (allTypes, dottedModulePath, _p31) {
-		var _p32 = _p31;
-		var _p35 = _p32._0;
+	function (allTypes, dottedModulePath, _p27) {
+		var _p28 = _p27;
 		var imports = A2(
 			_elm_lang$core$String$join,
 			'\n',
@@ -11975,67 +12030,69 @@ var _user$project$DataGeneration$generateViewFunction = F3(
 						return A2(_elm_lang$core$Basics_ops['++'], 'import ', dottedModulePath);
 					},
 					_elm_lang$core$Dict$keys(allTypes.allModulesInfo))));
-		var _p33 = _p32._1;
-		if (_p33.ctor === 'QualifiedLambda') {
+		var _p29 = _p28._1;
+		if (_p29.ctor === 'QualifiedLambda') {
 			var qualifiedFunctionName = A2(
 				_elm_lang$core$Basics_ops['++'],
 				dottedModulePath,
-				A2(_elm_lang$core$Basics_ops['++'], '.', _p35));
+				A2(_elm_lang$core$Basics_ops['++'], '.', _p28._0));
+			var argListToString = function (argList) {
+				return A2(_elm_lang$core$String$join, ' ', argList);
+			};
 			var argTypes = _elm_lang$core$List$reverse(
 				A2(
 					_elm_lang$core$List$drop,
 					1,
 					_elm_lang$core$List$reverse(
-						A2(_user$project$DataGeneration$lambdaToList, _p33._0, _p33._1))));
+						A2(_user$project$DataGeneration$lambdaToList, _p29._0, _p29._1))));
 			var args = A2(
 				_elm_lang$core$List$map,
-				function (arg) {
-					return A2(
-						_elm_lang$core$Basics_ops['++'],
-						'(',
-						A2(_elm_lang$core$Basics_ops['++'], arg, ')'));
-				},
 				A2(
-					_elm_lang$core$List$map,
+					_user$project$DataGeneration$generateData,
+					allTypes,
+					{ctor: '[]'}),
+				argTypes);
+			var argsCombinations = _user$project$Combinations$combinations(args);
+			var views = A2(
+				_elm_lang$core$List$map,
+				function (argList) {
+					return A3(
+						_elm_community$string_extra$String_Extra$replace,
+						', ',
+						',\n',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							qualifiedFunctionName,
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' ',
+								argListToString(argList))));
+				},
+				argsCombinations);
+			var code = _user$project$DataGeneration$wrapInHtmlProgram(
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					imports,
 					A2(
-						_user$project$DataGeneration$generateData,
-						allTypes,
-						{ctor: '[]'}),
-					argTypes));
+						_elm_lang$core$String$join,
+						'\n',
+						A2(_elm_lang$core$Debug$log, 'views', views))));
+			return code;
+		} else {
 			var code = _user$project$DataGeneration$wrapInHtmlProgram(
 				A3(
 					_elm_community$string_extra$String_Extra$replace,
 					', ',
 					',\n',
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						imports,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'\nstaticView = ',
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								qualifiedFunctionName,
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									' ',
-									A2(_elm_lang$core$String$join, '', args)))))));
-			return {ctor: '_Tuple2', _0: _p35, _1: code};
-		} else {
-			return _elm_lang$core$Native_Utils.crashCase(
-				'DataGeneration',
-				{
-					start: {line: 34, column: 9},
-					end: {line: 66, column: 94}
-				},
-				_p33)('We are only dealing with functions that take args at the moment');
+					A2(_elm_lang$core$Basics_ops['++'], imports, '\nstaticView = ')));
+			return code;
 		}
 	});
 var _user$project$DataGeneration$generateViewFunctions = function (unqualifiedAllTypes) {
-	var _p36 = _user$project$ToQualified$qualifyAllTypes(unqualifiedAllTypes);
-	var allTypes = _p36;
-	var subjectModuleInfo = _p36.subjectModuleInfo;
-	var allModulesInfo = _p36.allModulesInfo;
+	var _p30 = _user$project$ToQualified$qualifyAllTypes(unqualifiedAllTypes);
+	var allTypes = _p30;
+	var subjectModuleInfo = _p30.subjectModuleInfo;
+	var allModulesInfo = _p30.allModulesInfo;
 	return A2(
 		_elm_lang$core$List$map,
 		A2(_user$project$DataGeneration$generateViewFunction, allTypes, subjectModuleInfo.dottedModulePath),
@@ -13311,19 +13368,15 @@ var _user$project$Main$writeOutput = _elm_lang$core$Native_Platform.outgoingPort
 	function (v) {
 		return _elm_lang$core$Native_List.toArray(v).map(
 			function (v) {
-				return [v._0, v._1];
+				return v;
 			});
 	});
 var _user$project$Main$getWriteOutputFileCmd = function (model) {
-	var _p31 = A2(_elm_lang$core$Debug$log, 'writeOutputFileCmd', true);
-	var _p32 = _user$project$Main$isFinished(model);
-	if (_p32 === true) {
-		var _p33 = A2(_elm_lang$core$Debug$log, 'generated view functions', true);
+	var _p31 = _user$project$Main$isFinished(model);
+	if (_p31 === true) {
 		var simplifiedAllModuleInfos = A2(_user$project$Main$simplifyAllModulesInfo, model.allModulesInfo, model.subjectModuleInfo);
-		var _p34 = A2(_elm_lang$core$Debug$log, 'simplifiedAllModuleInfos', simplifiedAllModuleInfos);
 		var output = _user$project$DataGeneration$generateViewFunctions(
 			{subjectModuleInfo: model.subjectModuleInfo, allModulesInfo: simplifiedAllModuleInfos});
-		var _p35 = A2(_elm_lang$core$Debug$log, 'generating view functions', true);
 		return _user$project$Main$writeOutput(output);
 	} else {
 		return _elm_lang$core$Platform_Cmd$none;
@@ -13362,12 +13415,12 @@ var _user$project$Main$updateReadSourceFilesModel = F2(
 					rsfModel.moduleName,
 					_elm_lang$core$Maybe$map(
 						function (moduleInfo) {
-							var _p36 = moduleInfo.eitherModuleInfo;
-							if (_p36.ctor === 'Loaded') {
+							var _p32 = moduleInfo.eitherModuleInfo;
+							if (_p32.ctor === 'Loaded') {
 								return _elm_lang$core$Native_Utils.update(
 									moduleInfo,
 									{
-										eitherModuleInfo: _user$project$Main$Loaded(_p36._0)
+										eitherModuleInfo: _user$project$Main$Loaded(_p32._0)
 									});
 							} else {
 								return _elm_lang$core$Native_Utils.update(
@@ -13382,19 +13435,19 @@ var _user$project$Main$updateReadSourceFilesModel = F2(
 	});
 var _user$project$Main$updateAllModulesInfoForRsf = F4(
 	function (moduleName, rsfMsg, isTooManyCmdsInFlight, allModulesInfo) {
-		var _p37 = A3(_user$project$Helpers$unsafeDictGet, 'Main.elm line 312', moduleName, allModulesInfo);
-		var relevantNames = _p37.relevantNames;
-		var eitherModuleInfo = _p37.eitherModuleInfo;
-		var _p38 = eitherModuleInfo;
-		if (_p38.ctor === 'NotLoaded') {
-			var _p39 = A3(_user$project$ReadSourceFiles$update, rsfMsg, isTooManyCmdsInFlight, _p38._0);
-			var rsfModel = _p39.rsfModel;
-			var rsfGoal = _p39.rsfGoal;
-			var rsfCmds = _p39.rsfCmds;
-			var _p40 = rsfGoal;
-			if (_p40.ctor === 'Just') {
+		var _p33 = A3(_user$project$Helpers$unsafeDictGet, 'Main.elm line 312', moduleName, allModulesInfo);
+		var relevantNames = _p33.relevantNames;
+		var eitherModuleInfo = _p33.eitherModuleInfo;
+		var _p34 = eitherModuleInfo;
+		if (_p34.ctor === 'NotLoaded') {
+			var _p35 = A3(_user$project$ReadSourceFiles$update, rsfMsg, isTooManyCmdsInFlight, _p34._0);
+			var rsfModel = _p35.rsfModel;
+			var rsfGoal = _p35.rsfGoal;
+			var rsfCmds = _p35.rsfCmds;
+			var _p36 = rsfGoal;
+			if (_p36.ctor === 'Just') {
 				var moduleInfo = _user$project$DependentModules$getModuleInfo(
-					{sourceCode: _p40._0, relevantNames: relevantNames});
+					{sourceCode: _p36._0, relevantNames: relevantNames});
 				var newExternalModules = _user$project$ModuleInfo$groupNamesByModule(moduleInfo.externalNamesModuleInfo);
 				return {
 					newAllModulesInfo: A3(
@@ -13439,18 +13492,17 @@ var _user$project$Main$ReadSourceFilesMsg = F2(
 	});
 var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 	function (tupleList, model) {
-		var _p41 = A2(_elm_lang$core$Debug$log, '\n\n\nmodel', model);
 		var packageSourceDirectories = A2(
 			_elm_lang$core$List$concatMap,
-			function (_p42) {
-				var _p43 = _p42;
+			function (_p37) {
+				var _p38 = _p37;
 				return A2(
 					_elm_lang$core$List$map,
 					function (relativeSourceDirectory) {
 						return _ucode$elm_path$Path_Posix$joinPath(
 							{
 								ctor: '::',
-								_0: _ucode$elm_path$Path_Posix$dropFileName(_p43._0),
+								_0: _ucode$elm_path$Path_Posix$dropFileName(_p38._0),
 								_1: {
 									ctor: '::',
 									_0: relativeSourceDirectory,
@@ -13462,11 +13514,11 @@ var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 						return _.sourceDirectories;
 					}(
 						_user$project$Helpers$unsafeAssumeSuccess(
-							A2(_elm_lang$core$Json_Decode$decodeString, _user$project$PackageInfo$decoder, _p43._1))));
+							A2(_elm_lang$core$Json_Decode$decodeString, _user$project$PackageInfo$decoder, _p38._1))));
 			},
 			tupleList);
 		var allSourceDirectories = A2(_elm_lang$core$Basics_ops['++'], model.sourceDirectories, packageSourceDirectories);
-		var _p44 = A2(
+		var _p39 = A2(
 			_elm_lang$core$Tuple$mapSecond,
 			_elm_lang$core$List$concat,
 			A2(
@@ -13475,33 +13527,33 @@ var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 				_elm_lang$core$List$unzip(
 					A2(
 						_elm_lang$core$List$map,
-						function (_p45) {
-							var _p46 = _p45;
-							var _p48 = _p46.moduleName;
-							var _p47 = _user$project$ReadSourceFiles$init(
-								{sourceDirectories: allSourceDirectories, moduleName: _p48});
-							var rsfModel = _p47._0;
-							var rsfCmds = _p47._1;
+						function (_p40) {
+							var _p41 = _p40;
+							var _p43 = _p41.moduleName;
+							var _p42 = _user$project$ReadSourceFiles$init(
+								{sourceDirectories: allSourceDirectories, moduleName: _p43});
+							var rsfModel = _p42._0;
+							var rsfCmds = _p42._1;
 							return {
 								ctor: '_Tuple2',
 								_0: {
 									ctor: '_Tuple2',
-									_0: _p48,
+									_0: _p43,
 									_1: {
-										relevantNames: _p46.relevantNames,
+										relevantNames: _p41.relevantNames,
 										eitherModuleInfo: _user$project$Main$NotLoaded(rsfModel)
 									}
 								},
 								_1: A2(
 									_elm_lang$core$List$map,
 									_elm_lang$core$Platform_Cmd$map(
-										_user$project$Main$ReadSourceFilesMsg(_p48)),
+										_user$project$Main$ReadSourceFilesMsg(_p43)),
 									rsfCmds)
 							};
 						},
 						_user$project$ModuleInfo$groupNamesByModule(model.subjectModuleInfo.externalNamesModuleInfo)))));
-		var allModulesInfo = _p44._0;
-		var readSourceFilesCmds = _p44._1;
+		var allModulesInfo = _p39._0;
+		var readSourceFilesCmds = _p39._1;
 		var newModel = _elm_lang$core$Native_Utils.update(
 			model,
 			{packageSourceDirectoriesFound: true, sourceDirectories: allSourceDirectories, allModulesInfo: allModulesInfo});
@@ -13510,40 +13562,40 @@ var _user$project$Main$updateWithElmPackageInfoContentsResult = F2(
 	});
 var _user$project$Main$addNewExternalModules = F3(
 	function (sourceDirectories, allModulesInfo, newExternalModules) {
-		return function (_p49) {
-			var _p50 = _p49;
-			return {ctor: '_Tuple2', _0: _p50.accAllModulesInfo, _1: _p50.accCmds};
+		return function (_p44) {
+			var _p45 = _p44;
+			return {ctor: '_Tuple2', _0: _p45.accAllModulesInfo, _1: _p45.accCmds};
 		}(
 			A3(
 				_elm_lang$core$List$foldl,
 				F2(
-					function (_p52, _p51) {
-						var _p53 = _p52;
-						var _p57 = _p53.moduleName;
-						var _p54 = _p51;
-						var _p55 = A2(_elm_lang$core$Dict$get, _p57, allModulesInfo);
-						if (_p55.ctor === 'Just') {
-							return _p54;
+					function (_p47, _p46) {
+						var _p48 = _p47;
+						var _p52 = _p48.moduleName;
+						var _p49 = _p46;
+						var _p50 = A2(_elm_lang$core$Dict$get, _p52, allModulesInfo);
+						if (_p50.ctor === 'Just') {
+							return _p49;
 						} else {
-							var _p56 = _user$project$ReadSourceFiles$init(
-								{sourceDirectories: sourceDirectories, moduleName: _p57});
-							var rsfModel = _p56._0;
-							var rsfCmds = _p56._1;
+							var _p51 = _user$project$ReadSourceFiles$init(
+								{sourceDirectories: sourceDirectories, moduleName: _p52});
+							var rsfModel = _p51._0;
+							var rsfCmds = _p51._1;
 							var mappedCmds = A2(
 								_elm_lang$core$List$map,
 								_elm_lang$core$Platform_Cmd$map(
-									_user$project$Main$ReadSourceFilesMsg(_p57)),
+									_user$project$Main$ReadSourceFilesMsg(_p52)),
 								rsfCmds);
 							return {
 								accAllModulesInfo: A3(
 									_elm_lang$core$Dict$insert,
-									_p57,
+									_p52,
 									{
-										relevantNames: _p53.relevantNames,
+										relevantNames: _p48.relevantNames,
 										eitherModuleInfo: _user$project$Main$NotLoaded(rsfModel)
 									},
-									_p54.accAllModulesInfo),
-								accCmds: A2(_elm_lang$core$Basics_ops['++'], _p54.accCmds, mappedCmds)
+									_p49.accAllModulesInfo),
+								accCmds: A2(_elm_lang$core$Basics_ops['++'], _p49.accCmds, mappedCmds)
 							};
 						}
 					}),
@@ -13555,9 +13607,9 @@ var _user$project$Main$addNewExternalModules = F3(
 	});
 var _user$project$Main$readSourceFilesSubscription = A2(
 	_elm_lang$core$Platform_Sub$map,
-	function (_p58) {
-		var _p59 = _p58;
-		return A2(_user$project$Main$ReadSourceFilesMsg, _p59._0, _p59._1);
+	function (_p53) {
+		var _p54 = _p53;
+		return A2(_user$project$Main$ReadSourceFilesMsg, _p54._0, _p54._1);
 	},
 	_user$project$ReadSourceFiles$subscription);
 var _user$project$Main$Abort = {ctor: 'Abort'};
@@ -13589,52 +13641,44 @@ var _user$project$Main$Doing = {ctor: 'Doing'};
 var _user$project$Main$Failed = {ctor: 'Failed'};
 var _user$project$Main$Finished = {ctor: 'Finished'};
 var _user$project$Main$getCurrentProgressState = function (model) {
-	var _p60 = _user$project$Main$classifyLoads(model);
-	var inFlight = _p60.inFlight;
-	var loaded = _p60.loaded;
-	var failed = _p60.failed;
+	var _p55 = _user$project$Main$classifyLoads(model);
+	var inFlight = _p55.inFlight;
+	var loaded = _p55.loaded;
+	var failed = _p55.failed;
 	return (!_elm_lang$core$List$isEmpty(failed)) ? _user$project$Main$Failed : ((!_elm_lang$core$List$isEmpty(inFlight)) ? _user$project$Main$Doing : _user$project$Main$Finished);
 };
-var _user$project$Main$handleReadSourceFilesMsg = function (_p61) {
-	var _p62 = _p61;
-	var _p74 = _p62.moduleName;
-	var _p73 = _p62.model;
-	var _p63 = function () {
-		var _p64 = A4(_user$project$Main$updateAllModulesInfoForRsf, _p74, _p62.rsfMsg, _p62.isTooManyCmdsInFlight, _p73.allModulesInfo);
-		var newAllModulesInfo = _p64.newAllModulesInfo;
-		var newExternalModules = _p64.newExternalModules;
-		var rsfCmds = _p64.rsfCmds;
-		var _p65 = A3(_user$project$Main$addNewExternalModules, _p73.sourceDirectories, newAllModulesInfo, newExternalModules);
-		var allModulesInfo2 = _p65._0;
-		var newExtModulesCmds = _p65._1;
+var _user$project$Main$handleReadSourceFilesMsg = function (_p56) {
+	var _p57 = _p56;
+	var _p64 = _p57.moduleName;
+	var _p63 = _p57.model;
+	var _p58 = function () {
+		var _p59 = A4(_user$project$Main$updateAllModulesInfoForRsf, _p64, _p57.rsfMsg, _p57.isTooManyCmdsInFlight, _p63.allModulesInfo);
+		var newAllModulesInfo = _p59.newAllModulesInfo;
+		var newExternalModules = _p59.newExternalModules;
+		var rsfCmds = _p59.rsfCmds;
+		var _p60 = A3(_user$project$Main$addNewExternalModules, _p63.sourceDirectories, newAllModulesInfo, newExternalModules);
+		var allModulesInfo2 = _p60._0;
+		var newExtModulesCmds = _p60._1;
 		return {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Native_Utils.update(
-				_p73,
+				_p63,
 				{allModulesInfo: allModulesInfo2}),
 			_1: A2(
 				_elm_lang$core$Basics_ops['++'],
 				A2(
 					_elm_lang$core$List$map,
 					_elm_lang$core$Platform_Cmd$map(
-						_user$project$Main$ReadSourceFilesMsg(_p74)),
+						_user$project$Main$ReadSourceFilesMsg(_p64)),
 					rsfCmds),
 				newExtModulesCmds)
 		};
 	}();
-	var newModel = _p63._0;
-	var readSourceFilesCmds = _p63._1;
-	var _p66 = A2(
-		_elm_lang$core$Debug$log,
-		'\n\nmodule load status',
-		_user$project$Main$classifyLoads(newModel));
-	var _p67 = A2(
-		_elm_lang$core$Debug$log,
-		'\n\nisFinished?',
-		_user$project$Main$isFinished(newModel));
-	var _p68 = function () {
-		var _p69 = _user$project$Main$getCurrentProgressState(newModel);
-		switch (_p69.ctor) {
+	var newModel = _p58._0;
+	var readSourceFilesCmds = _p58._1;
+	var _p61 = function () {
+		var _p62 = _user$project$Main$getCurrentProgressState(newModel);
+		switch (_p62.ctor) {
 			case 'Failed':
 				return {
 					ctor: '_Tuple2',
@@ -13655,11 +13699,9 @@ var _user$project$Main$handleReadSourceFilesMsg = function (_p61) {
 							_user$project$Main$updateReadSourceFilesModel(newModel),
 							_user$project$ReadSourceFiles$kickBackIntoAction(rsfModel)));
 				} else {
-					var _p70 = A2(_elm_lang$core$Debug$log, '\n\n\nTHERE ARE STILL CMDS', true);
 					return {ctor: '_Tuple2', _0: newModel, _1: readSourceFilesCmds};
 				}
 			default:
-				var _p71 = A2(_elm_lang$core$Debug$log, '\n\n\nFINISHED!', true);
 				return {
 					ctor: '_Tuple2',
 					_0: newModel,
@@ -13667,10 +13709,9 @@ var _user$project$Main$handleReadSourceFilesMsg = function (_p61) {
 				};
 		}
 	}();
-	var model3 = _p68._0;
-	var readSourceFilesCmds2 = _p68._1;
+	var model3 = _p61._0;
+	var readSourceFilesCmds2 = _p61._1;
 	var writeOutputFileCmd = _user$project$Main$getWriteOutputFileCmd(model3);
-	var _p72 = A2(_elm_lang$core$Debug$log, 'writeOutputFileCmd', writeOutputFileCmd);
 	return {
 		ctor: '_Tuple2',
 		_0: model3,
@@ -13691,13 +13732,13 @@ var _user$project$Main$update = F2(
 		var isTooManyCmdsInFlight = _elm_lang$core$Native_Utils.cmp(
 			_user$project$Main$getNumCmdsInFlight(model),
 			_user$project$Main$maxCmdsAtOnce) > -1;
-		var _p75 = msg;
-		switch (_p75.ctor) {
+		var _p65 = msg;
+		switch (_p65.ctor) {
 			case 'ReadElmPackageInfoContentsResult':
-				return A2(_user$project$Main$updateWithElmPackageInfoContentsResult, _p75._0, model);
+				return A2(_user$project$Main$updateWithElmPackageInfoContentsResult, _p65._0, model);
 			case 'ReadSourceFilesMsg':
 				return _user$project$Main$handleReadSourceFilesMsg(
-					{isTooManyCmdsInFlight: isTooManyCmdsInFlight, model: model, moduleName: _p75._0, rsfMsg: _p75._1});
+					{isTooManyCmdsInFlight: isTooManyCmdsInFlight, model: model, moduleName: _p65._0, rsfMsg: _p65._1});
 			case 'Stop':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],

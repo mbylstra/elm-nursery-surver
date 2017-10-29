@@ -157,7 +157,7 @@ app.get("/api/view-function/", (request, response) => {
   });
 
   ports.writeOutput.subscribe(viewFunctions => {
-    viewFunctionCode = viewFunctions[0][1];
+    viewFunctionCode = viewFunctions[0];
     // formattedViewFunctions = viewFunctions.map(([name, code]) => [
     //   name,
     //   formatCode(code)
@@ -179,6 +179,7 @@ function requireUncached(module) {
 }
 
 function formatCode(code) {
+  console.log("code:--------\n\n", code);
   return execFileSync("elm-format", ["--stdin"], {
     input: code,
     encoding: "utf-8"
