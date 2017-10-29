@@ -1,6 +1,12 @@
 module DataGenerationTest exposing (..)
 
-import DataGeneration exposing (lambdaToList, generateLambda)
+import DataGeneration
+    exposing
+        ( lambdaToList
+        , generateLambda
+        , generateFromTypeConstructor
+        , generateFromUnionType
+        )
 import Expect exposing (Expectation, equalSets)
 import Test exposing (..)
 import Types exposing (..)
@@ -53,7 +59,10 @@ suite =
                         int
                     )
                         |> Expect.equal
-                            "(\\_ -> 1)"
+                            [ "(\\_ -> 0)"
+                            , "(\\_ -> 1)"
+                            , "(\\_ -> 2)"
+                            ]
             , test "more than one arg" <|
                 \_ ->
                     (generateLambda
@@ -63,6 +72,65 @@ suite =
                         (QualifiedLambda int int)
                     )
                         |> Expect.equal
-                            "(\\_ _ -> 1)"
+                            [ "(\\_ _ -> 0)"
+                            , "(\\_ _ -> 1)"
+                            , "(\\_ _ -> 2)"
+                            ]
+            ]
+        , describe "generateFromTypeConstructor"
+            [ test "simple type constructor with no args" <|
+                \_ ->
+                    (generateFromTypeConstructor
+                        emptyAllTypes
+                        "DummyModule"
+                        []
+                        ( "SomeTypeConstructor"
+                        , []
+                        )
+                    )
+                        |> Expect.equal
+                            [ "DummyModule.SomeTypeConstructor" ]
+            ]
+        , describe "generateFromUnionType"
+            [ test "simple type constructor with no args" <|
+                \_ ->
+                    (generateFromUnionType
+                        emptyAllTypes
+                        "DummyModule"
+                        []
+                        { name = "SomeUnionType"
+                        , typeVars = []
+                        , definition =
+                            [ ( "ConstructorA"
+                              , []
+                              )
+                            , ( "ConstructorB"
+                              , []
+                              )
+                            ]
+                        }
+                    )
+                        |> Expect.equal
+                            [ "DummyModule.ConstructorA"
+                            , "DummyModule.ConstructorB"
+                            ]
             ]
         ]
+
+
+
+-- generateFromUnionType :
+--     QualifiedAllTypes
+--     -> DottedModulePath
+--     -> InstantiatedTypeVars
+--     -> QualifiedUnionR
+--     -> List String
+-- type alias QualifiedUnionR =
+--     { name : String
+--     , typeVars : List String
+--     , definition : QualifiedUnionDefinition
+--     }
+-- generateFromTypeConstructor : QualifiedAllTypes -> DottedModulePath -> InstantiatedTypeVars -> QualifiedTypeConstructor -> List String
+-- type alias QualifiedTypeConstructor =
+--     ( String, QualifiedTypeConstructorArgs )
+-- Helpers ---------------------------------------------------------------------

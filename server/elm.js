@@ -11903,8 +11903,8 @@ var _user$project$DataGeneration$generateData = F3(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'DataGeneration',
 						{
-							start: {line: 115, column: 5},
-							end: {line: 203, column: 77}
+							start: {line: 137, column: 5},
+							end: {line: 225, column: 77}
 						},
 						_p2)('This is type that\'s in the too hard basket for now');
 			}
@@ -11937,8 +11937,8 @@ var _user$project$DataGeneration$substituteType = F3(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'DataGeneration',
 						{
-							start: {line: 292, column: 21},
-							end: {line: 297, column: 86}
+							start: {line: 351, column: 21},
+							end: {line: 356, column: 86}
 						},
 						_p16)(
 						A2(
@@ -11952,46 +11952,67 @@ var _user$project$DataGeneration$substituteType = F3(
 var _user$project$DataGeneration$generateFromUnionType = F4(
 	function (allTypes, dottedModulePath, instantiatedTypeVars, _p22) {
 		var _p23 = _p22;
-		var firstConstructor = _user$project$Helpers$unsafeListHead(_p23.definition);
-		return A4(_user$project$DataGeneration$generateFromTypeConstructor, allTypes, dottedModulePath, instantiatedTypeVars, firstConstructor);
+		var combinationsForConstructors = _elm_lang$core$List$concat(
+			A2(
+				_elm_lang$core$List$map,
+				A3(_user$project$DataGeneration$generateFromTypeConstructor, allTypes, dottedModulePath, instantiatedTypeVars),
+				_p23.definition));
+		return combinationsForConstructors;
 	});
 var _user$project$DataGeneration$generateFromTypeConstructor = F4(
 	function (allTypes, dottedModulePath, instantiateTypeVars, _p24) {
 		var _p25 = _p24;
-		var argListToString = function (argList) {
-			return A2(_elm_lang$core$String$join, ' ', argList);
-		};
-		var generateArg = function (tipe) {
-			return A2(
-				_elm_lang$core$List$map,
-				function (code) {
-					return A2(
-						_elm_lang$core$Basics_ops['++'],
-						' ( ',
-						A2(_elm_lang$core$Basics_ops['++'], code, ' ) '));
-				},
-				A3(_user$project$DataGeneration$generateData, allTypes, instantiateTypeVars, tipe));
-		};
-		var argsCombinations = _user$project$Combinations$combinations(
-			A2(_elm_lang$core$List$map, generateArg, _p25._1));
-		return A2(
-			_elm_lang$core$List$map,
-			function (argList) {
-				return A2(
+		var _p28 = _p25._0;
+		var _p27 = _p25._1;
+		var _p26 = _p27;
+		if (_p26.ctor === '[]') {
+			return {
+				ctor: '::',
+				_0: A2(
 					_elm_lang$core$Basics_ops['++'],
 					dottedModulePath,
-					A2(
+					A2(_elm_lang$core$Basics_ops['++'], '.', _p28)),
+				_1: {ctor: '[]'}
+			};
+		} else {
+			var argListToString = function (argList) {
+				return A2(_elm_lang$core$String$join, ' ', argList);
+			};
+			var generateArg = function (tipe) {
+				return A2(
+					_elm_lang$core$List$map,
+					function (code) {
+						return A2(
+							_elm_lang$core$Basics_ops['++'],
+							' ( ',
+							A2(_elm_lang$core$Basics_ops['++'], code, ' ) '));
+					},
+					A3(_user$project$DataGeneration$generateData, allTypes, instantiateTypeVars, tipe));
+			};
+			var argsCombinations = _user$project$Combinations$combinations(
+				function (a) {
+					return A2(_elm_lang$core$Debug$log, 'a', a);
+				}(
+					A2(_elm_lang$core$List$map, generateArg, _p27)));
+			return A2(
+				_elm_lang$core$List$map,
+				function (argList) {
+					return A2(
 						_elm_lang$core$Basics_ops['++'],
-						'.',
+						dottedModulePath,
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							_p25._0,
+							'.',
 							A2(
 								_elm_lang$core$Basics_ops['++'],
-								' ',
-								argListToString(argList)))));
-			},
-			argsCombinations);
+								_p28,
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									' ',
+									argListToString(argList)))));
+				},
+				argsCombinations);
+		}
 	});
 var _user$project$DataGeneration$lambdaToList = F2(
 	function (leftType, rightType) {
@@ -11999,9 +12020,9 @@ var _user$project$DataGeneration$lambdaToList = F2(
 			ctor: '::',
 			_0: leftType,
 			_1: function () {
-				var _p26 = rightType;
-				if (_p26.ctor === 'QualifiedLambda') {
-					return A2(_user$project$DataGeneration$lambdaToList, _p26._0, _p26._1);
+				var _p29 = rightType;
+				if (_p29.ctor === 'QualifiedLambda') {
+					return A2(_user$project$DataGeneration$lambdaToList, _p29._0, _p29._1);
 				} else {
 					return {
 						ctor: '::',
@@ -12012,9 +12033,57 @@ var _user$project$DataGeneration$lambdaToList = F2(
 			}()
 		};
 	});
+var _user$project$DataGeneration$generateLambda = F4(
+	function (allTypes, instantiatedTypeVars, leftType, rightType) {
+		return function (argsList) {
+			var _p30 = argsList;
+			if (_p30.ctor === '[]') {
+				return _elm_lang$core$Native_Utils.crashCase(
+					'DataGeneration',
+					{
+						start: {line: 242, column: 17},
+						end: {line: 266, column: 38}
+					},
+					_p30)('this shouldn\'t be possible');
+			} else {
+				if (_p30._1.ctor === '[]') {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'DataGeneration',
+						{
+							start: {line: 242, column: 17},
+							end: {line: 266, column: 38}
+						},
+						_p30)('this shouldn\'t be possible');
+				} else {
+					var returnedValues = A3(_user$project$DataGeneration$generateData, allTypes, instantiatedTypeVars, _p30._0);
+					var numIgnoredArgs = 1 + _elm_lang$core$List$length(_p30._1._1);
+					return A2(
+						_elm_lang$core$List$map,
+						function (returnedValue) {
+							return A2(
+								_elm_lang$core$Basics_ops['++'],
+								'(\\',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(
+										_elm_lang$core$String$join,
+										' ',
+										A2(_elm_lang$core$List$repeat, numIgnoredArgs, '_')),
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										' -> ',
+										A2(_elm_lang$core$Basics_ops['++'], returnedValue, ')'))));
+						},
+						returnedValues);
+				}
+			}
+		}(
+			_elm_lang$core$List$reverse(
+				A2(_user$project$DataGeneration$lambdaToList, leftType, rightType)));
+	});
 var _user$project$DataGeneration$generateViewFunction = F3(
-	function (allTypes, dottedModulePath, _p27) {
-		var _p28 = _p27;
+	function (allTypes, dottedModulePath, _p33) {
+		var _p34 = _p33;
 		var imports = A2(
 			_elm_lang$core$String$join,
 			'\n',
@@ -12030,12 +12099,27 @@ var _user$project$DataGeneration$generateViewFunction = F3(
 						return A2(_elm_lang$core$Basics_ops['++'], 'import ', dottedModulePath);
 					},
 					_elm_lang$core$Dict$keys(allTypes.allModulesInfo))));
-		var _p29 = _p28._1;
-		if (_p29.ctor === 'QualifiedLambda') {
+		var _p35 = _p34._1;
+		if (_p35.ctor === 'QualifiedLambda') {
+			var wrapElementsInDiv = function (elements) {
+				return function (innards) {
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						'div [] [',
+						A2(_elm_lang$core$Basics_ops['++'], innards, ']'));
+				}(
+					A2(_elm_lang$core$String$join, ', ', elements));
+			};
+			var wrapViewInDiv = function (view) {
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					'\ndiv [] [',
+					A2(_elm_lang$core$Basics_ops['++'], view, ']'));
+			};
 			var qualifiedFunctionName = A2(
 				_elm_lang$core$Basics_ops['++'],
 				dottedModulePath,
-				A2(_elm_lang$core$Basics_ops['++'], '.', _p28._0));
+				A2(_elm_lang$core$Basics_ops['++'], '.', _p34._0));
 			var argListToString = function (argList) {
 				return A2(_elm_lang$core$String$join, ' ', argList);
 			};
@@ -12044,7 +12128,7 @@ var _user$project$DataGeneration$generateViewFunction = F3(
 					_elm_lang$core$List$drop,
 					1,
 					_elm_lang$core$List$reverse(
-						A2(_user$project$DataGeneration$lambdaToList, _p29._0, _p29._1))));
+						A2(_user$project$DataGeneration$lambdaToList, _p35._0, _p35._1))));
 			var args = A2(
 				_elm_lang$core$List$map,
 				A2(
@@ -12069,14 +12153,15 @@ var _user$project$DataGeneration$generateViewFunction = F3(
 								argListToString(argList))));
 				},
 				argsCombinations);
-			var code = _user$project$DataGeneration$wrapInHtmlProgram(
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					imports,
+			var code = function () {
+				var bodyCode = wrapElementsInDiv(
+					A2(_elm_lang$core$List$map, wrapViewInDiv, views));
+				return _user$project$DataGeneration$wrapInHtmlProgram(
 					A2(
-						_elm_lang$core$String$join,
-						'\n',
-						A2(_elm_lang$core$Debug$log, 'views', views))));
+						_elm_lang$core$Basics_ops['++'],
+						imports,
+						A2(_elm_lang$core$Basics_ops['++'], '\nstaticView = ', bodyCode)));
+			}();
 			return code;
 		} else {
 			var code = _user$project$DataGeneration$wrapInHtmlProgram(
@@ -12089,10 +12174,10 @@ var _user$project$DataGeneration$generateViewFunction = F3(
 		}
 	});
 var _user$project$DataGeneration$generateViewFunctions = function (unqualifiedAllTypes) {
-	var _p30 = _user$project$ToQualified$qualifyAllTypes(unqualifiedAllTypes);
-	var allTypes = _p30;
-	var subjectModuleInfo = _p30.subjectModuleInfo;
-	var allModulesInfo = _p30.allModulesInfo;
+	var _p36 = _user$project$ToQualified$qualifyAllTypes(unqualifiedAllTypes);
+	var allTypes = _p36;
+	var subjectModuleInfo = _p36.subjectModuleInfo;
+	var allModulesInfo = _p36.allModulesInfo;
 	return A2(
 		_elm_lang$core$List$map,
 		A2(_user$project$DataGeneration$generateViewFunction, allTypes, subjectModuleInfo.dottedModulePath),

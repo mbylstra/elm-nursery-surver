@@ -30,7 +30,7 @@ generateViewFunction allTypes dottedModulePath ( functionName, functionType ) =
         imports =
             Dict.keys allTypes.allModulesInfo
                 |> List.map (\dottedModulePath -> "import " ++ dottedModulePath)
-                |> (::) "import Html"
+                |> (::) "import Html exposing (div)"
                 |> String.join "\n"
     in
         case functionType of
@@ -73,14 +73,26 @@ generateViewFunction allTypes dottedModulePath ( functionName, functionType ) =
                                         |> String.Extra.replace ", " ",\n"
                                 )
 
+                    wrapViewInDiv : String -> String
+                    wrapViewInDiv view =
+                        "\ndiv [] [" ++ view ++ "]"
+
+                    wrapElementsInDiv : List String -> String
+                    wrapElementsInDiv elements =
+                        elements |> String.join ", " |> (\innards -> "div [] [" ++ innards ++ "]")
+
                     code : String
                     code =
-                        (imports
-                            ++ ((Debug.log "views" views) |> String.join "\n")
-                        )
-                            -- something extremly basic prettification, that will then get cleaned up
-                            -- by elm-format, so it doesn't all end up on one line
-                            |> wrapInHtmlProgram
+                        let
+                            bodyCode =
+                                views
+                                    |> List.map wrapViewInDiv
+                                    |> wrapElementsInDiv
+                        in
+                            (imports ++ "\nstaticView = " ++ bodyCode)
+                                -- something extremly basic prettification, that will then get cleaned up
+                                -- by elm-format, so it doesn't all end up on one line
+                                |> wrapInHtmlProgram
                 in
                     code
 
@@ -94,6 +106,16 @@ generateViewFunction allTypes dottedModulePath ( functionName, functionType ) =
                             |> wrapInHtmlProgram
                 in
                     code
+
+
+
+-- import Html
+-- import Pages.IndividualFeedback.ReviewerBadgePages.IndividualFeedback.ReviewerBadge.view Pages.IndividualFeedback.ReviewerBadge.Small Pages.IndividualFeedback.ReviewerBadge.Manager
+--     |> Html.map (\_ -> ())
+-- import Html
+-- import Pages.IndividualFeedback.ReviewerBadge
+-- staticView = Pages.IndividualFeedback.ReviewerBadge.view Pages.IndividualFeedback.ReviewerBadge.Small Pages.IndividualFeedback.ReviewerBadge.Manager
+--     |> Html.map (\_ -> ())
 
 
 lambdaToList : QualifiedType -> QualifiedType -> List QualifiedType
@@ -204,64 +226,101 @@ generateData ({ subjectModuleInfo, allModulesInfo } as allTypes) instantiatedTyp
 
 
 
--- generateLambda : QualifiedAllTypes -> InstantiatedTypeVars -> QualifiedType -> QualifiedType -> List String
--- generateLambda allTypes instantiatedTypeVars leftType rightType =
---     lambdaToList leftType rightType
---         |> List.reverse
---         |> (\argsList ->
---                 case argsList of
---                     [] ->
---                         Debug.crash "this shouldn't be possible"
---
---                     returnValue :: [] ->
---                         Debug.crash "this shouldn't be possible"
---
---                     returnValue :: arg1 :: args ->
---                         let
---                             numIgnoredArgs =
---                                 1 + List.length args
---
---                             returnedValue =
---                                 generateData allTypes instantiatedTypeVars returnValue
---                         in
---                             "(\\" ++ (List.repeat numIgnoredArgs "_" |> String.join " ") ++ " -> " ++ returnedValue ++ ")"
---            )
+-- TODO: fix this!
 
 
-generateFromUnionType : QualifiedAllTypes -> DottedModulePath -> InstantiatedTypeVars -> QualifiedUnionR -> List String
+generateLambda :
+    QualifiedAllTypes
+    -> InstantiatedTypeVars
+    -> QualifiedType
+    -> QualifiedType
+    -> List String
+generateLambda allTypes instantiatedTypeVars leftType rightType =
+    lambdaToList leftType rightType
+        |> List.reverse
+        |> (\argsList ->
+                case argsList of
+                    [] ->
+                        Debug.crash "this shouldn't be possible"
+
+                    returnValue :: [] ->
+                        Debug.crash "this shouldn't be possible"
+
+                    returnValue :: arg1 :: args ->
+                        let
+                            numIgnoredArgs =
+                                1 + List.length args
+
+                            returnedValues : List String
+                            returnedValues =
+                                generateData allTypes instantiatedTypeVars returnValue
+                        in
+                            returnedValues
+                                |> List.map
+                                    (\returnedValue ->
+                                        "(\\"
+                                            ++ (List.repeat numIgnoredArgs "_" |> String.join " ")
+                                            ++ " -> "
+                                            ++ returnedValue
+                                            ++ ")"
+                                    )
+           )
+
+
+generateFromUnionType :
+    QualifiedAllTypes
+    -> DottedModulePath
+    -> InstantiatedTypeVars
+    -> QualifiedUnionR
+    -> List String
 generateFromUnionType allTypes dottedModulePath instantiatedTypeVars { name, typeVars, definition } =
     let
-        firstConstructor =
+        -- firstConstructor =
+        --     definition
+        --         |> unsafeListHead
+        combinationsForConstructors =
             definition
-                |> unsafeListHead
+                |> List.map (generateFromTypeConstructor allTypes dottedModulePath instantiatedTypeVars)
+                |> List.concat
     in
-        firstConstructor |> generateFromTypeConstructor allTypes dottedModulePath instantiatedTypeVars
+        combinationsForConstructors
 
 
-generateFromTypeConstructor : QualifiedAllTypes -> DottedModulePath -> InstantiatedTypeVars -> QualifiedTypeConstructor -> List String
+generateFromTypeConstructor :
+    QualifiedAllTypes
+    -> DottedModulePath
+    -> InstantiatedTypeVars
+    -> QualifiedTypeConstructor
+    -> List String
 generateFromTypeConstructor allTypes dottedModulePath instantiateTypeVars ( name, args ) =
-    let
-        generateArg : QualifiedType -> List String
-        generateArg tipe =
-            generateData allTypes instantiateTypeVars tipe
-                |> List.map (\code -> " ( " ++ code ++ " ) ")
+    case args of
+        [] ->
+            [ dottedModulePath ++ "." ++ name ]
 
-        -- for each arg we get a list of args
-        argsCombinations : List (List String)
-        argsCombinations =
-            args
-                |> List.map generateArg
-                |> Combinations.combinations
+        _ ->
+            let
+                generateArg : QualifiedType -> List String
+                generateArg tipe =
+                    generateData allTypes instantiateTypeVars tipe
+                        |> List.map (\code -> " ( " ++ code ++ " ) ")
 
-        argListToString : List String -> String
-        argListToString argList =
-            argList |> String.join " "
-    in
-        argsCombinations
-            |> List.map
-                (\argList ->
-                    dottedModulePath ++ "." ++ name ++ " " ++ (argListToString argList)
-                )
+                -- for each arg we get a list of args
+                argsCombinations : List (List String)
+                argsCombinations =
+                    args
+                        |> List.map generateArg
+                        |> (\a -> Debug.log "a" a)
+                        |> Combinations.combinations
+
+                argListToString : List String -> String
+                argListToString argList =
+                    argList |> String.join " "
+            in
+                argsCombinations
+                    |> List.map
+                        (\argList ->
+                            dottedModulePath ++ "." ++ name ++ " " ++ (argListToString argList)
+                        )
 
 
 
