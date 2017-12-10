@@ -69,7 +69,7 @@ enclosing version =
 
 splitRegex : Regex
 splitRegex =
-    Regex.regex "\\s*<=\\s*v\\s*<\\s*"
+    Regex.regex "\\s*<=\\s*v\\s*<=?\\s*"
 
 
 parseSegment : String -> Maybe String -> Result String Version
