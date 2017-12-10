@@ -158,7 +158,7 @@ suite =
                                     , ( "dir4", InFlight )
                                     , ( "dir5", InFlight )
                                     , ( "dir6", InFlight )
-                                    , ( "dir7", DirNotAttemptedYet )
+                                    , ( "dir8", DirNotAttemptedYet )
                                     ]
                             }
 
@@ -382,5 +382,187 @@ suite =
                     in
                         ReadSourceFiles.hasFailed model
                             |> Expect.equal (Just model)
+            ]
+        , describe "update"
+            [ test "sets source code when source code found" <|
+                \_ ->
+                    let
+                        model =
+                            { moduleName = "Module1"
+                            , maybeSourceCode = Nothing
+                            , dirAttempts =
+                                Dict.fromList
+                                    [ ( "dir1", InFlight )
+                                    ]
+                            }
+
+                        msg =
+                            ReadSourceFiles.ReadElmModuleResult
+                                { maybeContents = Just "x = 1"
+                                , portScope = { path = "dir1", dir = "dir1", moduleName = "Module1" }
+                                }
+                    in
+                        ReadSourceFiles.update msg False model
+                            |> Expect.equal
+                                { rsfModel =
+                                    { moduleName = "Module1"
+                                    , maybeSourceCode = Just "x = 1"
+                                    , dirAttempts =
+                                        Dict.fromList
+                                            [ ( "dir1", DirSuccess )
+                                            ]
+                                    }
+                                , rsfGoal = Just "x = 1"
+                                , rsfCmds = []
+                                }
+            , test "sets failure when wrong dir looked up" <|
+                \_ ->
+                    let
+                        model =
+                            { moduleName = "Module1"
+                            , maybeSourceCode = Nothing
+                            , dirAttempts =
+                                Dict.fromList
+                                    [ ( "dir1", InFlight )
+                                    ]
+                            }
+
+                        msg =
+                            ReadSourceFiles.ReadElmModuleResult
+                                { maybeContents = Nothing
+                                , portScope = { path = "dir1", dir = "dir1", moduleName = "Module1" }
+                                }
+                    in
+                        ReadSourceFiles.update msg False model
+                            |> Expect.equal
+                                { rsfModel =
+                                    { moduleName = "Module1"
+                                    , maybeSourceCode = Nothing
+                                    , dirAttempts =
+                                        Dict.fromList
+                                            [ ( "dir1", DirFail )
+                                            ]
+                                    }
+                                , rsfGoal = Nothing
+                                , rsfCmds = []
+                                }
+            , test "emits a cmd and sets InFlight if there is still a dir to try" <|
+                \_ ->
+                    let
+                        model =
+                            { moduleName = "Module1"
+                            , maybeSourceCode = Nothing
+                            , dirAttempts =
+                                Dict.fromList
+                                    [ ( "dir1", InFlight )
+                                    , ( "dir2", DirNotAttemptedYet )
+                                    ]
+                            }
+
+                        msg =
+                            ReadSourceFiles.ReadElmModuleResult
+                                { maybeContents = Nothing
+                                , portScope = { path = "dir1", dir = "dir1", moduleName = "Module1" }
+                                }
+                    in
+                        ReadSourceFiles.update msg False model
+                            |> Expect.all
+                                [ .rsfGoal >> Expect.equal Nothing
+                                , .rsfModel
+                                    >> Expect.equal
+                                        { moduleName = "Module1"
+                                        , maybeSourceCode = Nothing
+                                        , dirAttempts =
+                                            Dict.fromList
+                                                [ ( "dir1", DirFail )
+                                                , ( "dir2", InFlight )
+                                                ]
+                                        }
+                                , .rsfCmds >> List.length >> Expect.equal 1
+                                ]
+            , test "don't bother trying more dirs if we already found one" <|
+                \_ ->
+                    let
+                        model =
+                            { moduleName = "Module1"
+                            , maybeSourceCode = Nothing
+                            , dirAttempts =
+                                Dict.fromList
+                                    [ ( "dir1", InFlight )
+                                    , ( "dir2", DirNotAttemptedYet )
+                                    ]
+                            }
+
+                        msg =
+                            ReadSourceFiles.ReadElmModuleResult
+                                { maybeContents = Just "x = 1"
+                                , portScope = { path = "dir1", dir = "dir1", moduleName = "Module1" }
+                                }
+                    in
+                        ReadSourceFiles.update msg False model
+                            |> Expect.all
+                                [ .rsfGoal >> Expect.equal (Just "x = 1")
+                                , .rsfModel
+                                    >> Expect.equal
+                                        { moduleName = "Module1"
+                                        , maybeSourceCode = Just "x = 1"
+                                        , dirAttempts =
+                                            Dict.fromList
+                                                [ ( "dir1", DirSuccess )
+                                                , ( "dir2", DirNotAttemptedYet )
+                                                ]
+                                        }
+                                , .rsfCmds >> List.length >> Expect.equal 0
+                                ]
+            ]
+        , describe "updateDirAttempt"
+            [ test "sets to success if there is source code" <|
+                \_ ->
+                    ReadSourceFiles.updateDirAttempt (Just "x = 1") InFlight
+                        |> Expect.equal DirSuccess
+            , test "sets to fail if not" <|
+                \_ ->
+                    ReadSourceFiles.updateDirAttempt Nothing InFlight
+                        |> Expect.equal DirFail
+            ]
+        , describe "isInFlight"
+            [ test "InFlight returns True" <|
+                \_ ->
+                    ReadSourceFiles.isInFlight InFlight
+                        |> Expect.equal True
+            , test "DirSuccess returns False" <|
+                \_ ->
+                    ReadSourceFiles.isInFlight DirSuccess
+                        |> Expect.equal False
+            , test "DirFail returns False" <|
+                \_ ->
+                    ReadSourceFiles.isInFlight DirFail
+                        |> Expect.equal False
+            , test "DirNotAttemptedYet returns False" <|
+                \_ ->
+                    ReadSourceFiles.isInFlight DirNotAttemptedYet
+                        |> Expect.equal False
+            ]
+        , describe "numCmdsInFlight"
+            [ test "returns 6 if 6 are in flight" <|
+                \_ ->
+                    let
+                        model =
+                            { moduleName = "Module1"
+                            , maybeSourceCode = Nothing
+                            , dirAttempts =
+                                Dict.fromList
+                                    [ ( "dir1", InFlight )
+                                    , ( "dir2", InFlight )
+                                    , ( "dir3", InFlight )
+                                    , ( "dir4", InFlight )
+                                    , ( "dir5", InFlight )
+                                    , ( "dir6", InFlight )
+                                    , ( "dir8", DirNotAttemptedYet )
+                                    ]
+                            }
+                    in
+                        ReadSourceFiles.numCmdsInFlight model
+                            |> Expect.equal 6
             ]
         ]

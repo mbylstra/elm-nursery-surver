@@ -39,10 +39,6 @@ type DirAttempt
     | DirFail
 
 
-type alias ReadElmModulePortScope =
-    { path : String, dir : String, moduleName : String }
-
-
 type Msg
     = ReadElmModuleResult ReadElmModuleResultR
 
@@ -51,6 +47,10 @@ type alias ReadElmModuleResultR =
     { maybeContents : Maybe String
     , portScope : ReadElmModulePortScope
     }
+
+
+type alias ReadElmModulePortScope =
+    { path : String, dir : String, moduleName : String }
 
 
 type alias GetFilenamesInDirResultR =
@@ -103,6 +103,11 @@ kickBackIntoAction model =
     getNextCmds { model = model, maxCmdsReached = False }
 
 
+maxCmdsInFlight : Int
+maxCmdsInFlight =
+    5
+
+
 getNextCmds : { model : Model, maxCmdsReached : Bool } -> ( Model, List (Cmd Msg) )
 getNextCmds { model, maxCmdsReached } =
     let
@@ -112,7 +117,7 @@ getNextCmds { model, maxCmdsReached } =
         _ =
             Debug.log "numCmdsInFlight " (numCmdsInFlight model)
     in
-        if maxCmdsReached || (numCmdsInFlight model >= 1) then
+        if maxCmdsReached || (numCmdsInFlight model > maxCmdsInFlight) then
             -- if maxCmdsReached then
             ( model, [] )
         else
@@ -274,7 +279,7 @@ update msg maxCmdsReached model =
                             model.dirAttempts
                                 |> Dict.update
                                     portScope.dir
-                                    (updateDirAttempt maybeContents)
+                                    (Maybe.map (updateDirAttempt maybeContents))
                         , maybeSourceCode = maybeContents
                     }
 
@@ -287,18 +292,14 @@ update msg maxCmdsReached model =
                 { rsfModel = model3, rsfCmds = cmds, rsfGoal = goal |> Result.toMaybe }
 
 
-updateDirAttempt : Maybe String -> Maybe DirAttempt -> Maybe DirAttempt
-updateDirAttempt maybeSourceCode maybeDirAttempt =
-    maybeDirAttempt
-        |> Maybe.map
-            (\_ ->
-                case maybeSourceCode of
-                    Just sourceCode ->
-                        DirSuccess
+updateDirAttempt : Maybe String -> DirAttempt -> DirAttempt
+updateDirAttempt maybeSourceCode dirAttempt =
+    case maybeSourceCode of
+        Just sourceCode ->
+            DirSuccess
 
-                    Nothing ->
-                        DirFail
-            )
+        Nothing ->
+            DirFail
 
 
 isInFlight : DirAttempt -> Bool
