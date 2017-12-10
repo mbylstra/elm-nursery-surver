@@ -1,0 +1,6 @@
+tests/FirstPassTest.elm src/FirstPass.elm
+tests/HelpersTest.elm src/Helpers.elm
+tests/ImportStatementTest.elm src/ImportStatement.elm
+tests/ModuleInfoTest.elm src/ModuleInfo.elm
+tests/ReadSourceFilesTest.elm src/ReadSourceFiles.elm
+tests/ElmTypesParserTest.elm src/ElmTypesParser.elm
