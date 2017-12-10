@@ -85,26 +85,17 @@ suite =
                     Dict.fromList [ ( 1, "a" ), ( 2, "b" ) ]
                         |> Helpers.unsafeDictGet "error" 1
                         |> Expect.equal "a"
-
-            -- , test "crashes if key doesn't exist" <|
-            -- currently no way to test this
             ]
         , describe "unsafeAssumeSuccess"
             [ test "unwraps an Ok value" <|
                 \_ ->
                     Helpers.unsafeAssumeSuccess (Result.Ok "hello")
                         |> Expect.equal "hello"
-
-            -- , test "crashes if key doesn't exist" <|
-            -- currently no way to test this
             ]
         , describe "unsafeListHead"
             [ test "unwraps successful result" <|
                 \_ ->
                     Helpers.unsafeListHead [ "a" ]
                         |> Expect.equal "a"
-
-            -- , test "crashes if key doesn't exist" <|
-            -- currently no way to test this
             ]
         ]
