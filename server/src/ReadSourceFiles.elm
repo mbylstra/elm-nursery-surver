@@ -242,6 +242,9 @@ haveNotExhaustedAllOptions dirAttempts =
                     DirNotAttemptedYet ->
                         Just dir
 
+                    InFlight ->
+                        Just dir
+
                     _ ->
                         Nothing
             )
