@@ -1,17 +1,11 @@
 module CommentsParser exposing (..)
 
 
-removeOneLineComments : String -> String
-removeOneLineComments sourceCode =
-    let
-        removeOneLineComment : String -> String
-        removeOneLineComment line =
-            line |> String.split "--" |> List.head |> Maybe.withDefault ""
-    in
-        sourceCode
-            |> String.lines
-            |> List.map removeOneLineComment
-            |> String.join "\n"
+removeComments : String -> String
+removeComments sourceCode =
+    sourceCode
+        |> removeMultiLineComments
+        |> removeOneLineComments
 
 
 commentOpener : String
@@ -166,5 +160,14 @@ getToken remainder =
                 EOF
 
 
-
--- WARNING: watch out for interactions between -- and --}
+removeOneLineComments : String -> String
+removeOneLineComments sourceCode =
+    let
+        removeOneLineComment : String -> String
+        removeOneLineComment line =
+            line |> String.split "--" |> List.head |> Maybe.withDefault ""
+    in
+        sourceCode
+            |> String.lines
+            |> List.map removeOneLineComment
+            |> String.join "\n"

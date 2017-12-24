@@ -8,7 +8,27 @@ import CommentsParser
 suite : Test
 suite =
     describe "CommentsParser.elm"
-        [ describe "removeMultiLineCommentsInner"
+        [ describe "removeComments"
+            [ test "the comment trick works - not commented out" <|
+                \_ ->
+                    "{--} add x y = x + y --}"
+                        |> CommentsParser.removeComments
+                        |> Expect.equal " add x y = x + y "
+            , test "the comment trick works - commented out" <|
+                \_ ->
+                    "{-- add x y = x + y --}"
+                        |> CommentsParser.removeComments
+                        |> Expect.equal ""
+            ]
+        , describe "removeMultiLineComments"
+            [ test "works on a simple case" <|
+                \_ ->
+                    "foo {- bar -} baz"
+                        |> CommentsParser.removeMultiLineComments
+                        |> Expect.equal
+                            "foo  baz"
+            ]
+        , describe "removeMultiLineCommentsInner"
             [ test "stops recursing on EOF" <|
                 \_ ->
                     { edited = "", remainder = "", level = 0 }
@@ -132,5 +152,22 @@ suite =
                     "xyz"
                         |> CommentsParser.chompHelp (CommentsParser.Other 'x')
                         |> Expect.equal { tokenStr = "x", remainder = "yz" }
+            ]
+        , describe "removeOneLineComments" <|
+            [ test "removes a single trailing one line comment from one line" <|
+                \_ ->
+                    "abc --testing 1 2 3"
+                        |> CommentsParser.removeOneLineComments
+                        |> Expect.equal "abc "
+            , test "removes comments from multiple lines" <|
+                \_ ->
+                    "abc --testing 1 2 3\ndef --testing 4 5 6"
+                        |> CommentsParser.removeOneLineComments
+                        |> Expect.equal "abc \ndef "
+            , test "removes multiple comments on the one line" <|
+                \_ ->
+                    "abc --testing 1 2 3 --testing 1 2 3"
+                        |> CommentsParser.removeOneLineComments
+                        |> Expect.equal "abc "
             ]
         ]
