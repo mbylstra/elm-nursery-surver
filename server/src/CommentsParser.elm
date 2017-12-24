@@ -87,7 +87,10 @@ removeMultiLineCommentsInner model =
         finalLevel =
             case token of
                 CommentCloser ->
-                    chompLevel - 1
+                    if chompLevel > 0 then
+                        chompLevel - 1
+                    else
+                        0
 
                 _ ->
                     chompLevel

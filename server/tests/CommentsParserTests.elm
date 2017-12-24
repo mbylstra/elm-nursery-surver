@@ -51,6 +51,24 @@ suite =
                         |> CommentsParser.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "ac", remainder = "", level = 0 }
+            , test "does not get tripped up by records" <|
+                \_ ->
+                    { edited = "", remainder = "type alias Foo = {a:Int,b:Int}", level = 0 }
+                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> Expect.equal
+                            { edited = "type alias Foo = {a:Int,b:Int}", remainder = "", level = 0 }
+            , test "handles extra dashes" <|
+                \_ ->
+                    { edited = "", remainder = "{--}", level = 0 }
+                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> Expect.equal
+                            { edited = "", remainder = "", level = 0 }
+            , test "level is always positive" <|
+                \_ ->
+                    { edited = "", remainder = "-}", level = 0 }
+                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> Expect.equal
+                            { edited = "-}", remainder = "", level = 0 }
             ]
         , describe "getToken"
             [ test "parses a CommentOpener" <|
