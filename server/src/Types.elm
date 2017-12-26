@@ -18,14 +18,6 @@ type alias ModuleStatement =
     String
 
 
-type Type
-    = Var String
-    | Lambda Type Type
-    | Tuple (List Type)
-    | Type String (List Type)
-    | Record (List ( String, Type )) (Maybe String)
-
-
 type alias QualifiedName =
     { dottedModulePath : String, name : String }
 
@@ -38,27 +30,12 @@ type QualifiedType
     | QualifiedRecord (List ( String, QualifiedType )) (Maybe String)
 
 
-type alias TypeConstructor =
-    ( String, TypeConstructorArgs )
-
-
 type alias QualifiedTypeConstructor =
     ( String, QualifiedTypeConstructorArgs )
 
 
-type alias TypeConstructorArgs =
-    List Type
-
-
 type alias QualifiedTypeConstructorArgs =
     List QualifiedType
-
-
-type alias UnionR =
-    { name : String
-    , typeVars : List String
-    , definition : UnionDefinition
-    }
 
 
 type alias QualifiedUnionR =
@@ -68,19 +45,8 @@ type alias QualifiedUnionR =
     }
 
 
-type alias UnionDefinition =
-    List TypeConstructor
-
-
 type alias QualifiedUnionDefinition =
     List QualifiedTypeConstructor
-
-
-type alias TypeAliasDefinitionR =
-    { name : String
-    , typeVars : List String
-    , definition : Type
-    }
 
 
 type alias ImportStatement =
@@ -88,10 +54,6 @@ type alias ImportStatement =
     , maybeAlias : Maybe String
     , exposedNames : Listing
     }
-
-
-type alias TypeAnnotation =
-    ( String, Type )
 
 
 type alias FullModulePath =

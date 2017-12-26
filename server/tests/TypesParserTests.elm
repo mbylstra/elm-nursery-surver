@@ -1,32 +1,29 @@
-module ElmTypesParserTest exposing (..)
+module TypesParserTests exposing (..)
 
-import ElmTypesParser
+import TypesParser
     exposing
         ( parseTypeAlias
         , parseUnion
         , parseTypeConstructor
         , parseTypeConstructors
         , someWhitespace
+        , Type(..)
+        , UnionR
+        , TypeAliasDefinitionR
         )
-import Types exposing (Type(..), UnionR, TypeAliasDefinitionR)
 import Expect exposing (Expectation, equalSets)
 import Parser exposing (Parser, (|.), (|=))
 import Result.Extra exposing (isErr)
 import Test exposing (..)
 
 
--- import DataGeneration exposing (generateData)
-
-import FirstPass exposing (splitIntoBlocks)
-
-
 suite : Test
 suite =
-    describe "ElmTypesParser"
+    describe "TypesParser"
         [ test "works" <|
             \_ ->
                 "Int"
-                    |> ElmTypesParser.parseTipe
+                    |> TypesParser.parseTipe
                     |> Expect.equal
                         (Ok <|
                             Type "Int" []
@@ -35,13 +32,13 @@ suite =
         -- , test "complex one" <|
         --     \_ ->
         --         "(Int -> a) -> { x : Int, y : { z : String }}"
-        --             |> ElmTypesParser.parse
+        --             |> TypesParser.parse
         --             |> toString
         --             |> Expect.equal "asdasd"
         -- , test "generateData" <|
         --     \_ ->
         --         "Int -> Bool -> Html Msg"
-        --             |> ElmTypesParser.parseTipe
+        --             |> TypesParser.parseTipe
         --             |> Result.map generateData
         --             |> Expect.equal (Ok "1 True")
         , test "someWhitespace 1" <|
@@ -89,27 +86,9 @@ suite =
         --           """
         --         in
         --             s
-        --                 |> ElmTypesParser.parse
+        --                 |> TypesParser.parse
         --                 |> Result.map generateData
         --                 |> Expect.equal (Ok "1 True")
-        , test "splitIntoBlocks" <|
-            \_ ->
-                [ "aaa", "aaa", "bbb", "ccc" ]
-                    |> splitIntoBlocks
-                    |> Expect.equal
-                        [ "aaa"
-                        , "aaa"
-                        , "bbb"
-                        , "ccc"
-                        ]
-
-        -- , test "classifyBlocks" <|
-        --     \_ ->
-        --         "module Blah exposing (..)\nimport String\n\ntype alias Id = Int\ntype MyType = MyType\nx : Int\nx = 5\n\n"
-        --             |> splitIntoBlocks
-        --             |> List.map classifyBlock
-        --             |> Expect.equal
-        --                 [ ModuleStatement, ImportStatement, TypeAnnotation, FunctionDefinition ]
         , test "parse type alias" <|
             \_ ->
                 "type alias Id = Int"
