@@ -1,18 +1,18 @@
-module MultiLineStringParserTests exposing (..)
+module ElmAst.MultiLineStringTests exposing (..)
 
 import Expect exposing (Expectation, equalSets)
 import Test exposing (..)
-import MultiLineStringParser
+import ElmAst.MultiLineString
 
 
 suite : Test
 suite =
-    describe "MultiLineStringParser.elm"
+    describe "ElmAst.MultiLineString.elm"
         [ describe "removeMultiLineComments"
             [ test "works on a simple case" <|
                 \_ ->
                     "outside\noutside\"\"\"inside\ninside\"\"\"outside\noutside"
-                        |> MultiLineStringParser.convertMultiLineStrings
+                        |> ElmAst.MultiLineString.convertMultiLineStrings
                         |> Expect.equal
                             "outside\noutside\"inside\\ninside\"outside\noutside"
             ]
@@ -20,25 +20,25 @@ suite =
             [ test "stops recursing on EOF" <|
                 \_ ->
                     { edited = "", remainder = "", inside = False }
-                        |> MultiLineStringParser.convertMultiLineStringsInner
+                        |> ElmAst.MultiLineString.convertMultiLineStringsInner
                         |> Expect.equal
                             { edited = "", remainder = "", inside = False }
             , test "handles a single char" <|
                 \_ ->
                     { edited = "", remainder = "x", inside = False }
-                        |> MultiLineStringParser.convertMultiLineStringsInner
+                        |> ElmAst.MultiLineString.convertMultiLineStringsInner
                         |> Expect.equal
                             { edited = "x", remainder = "", inside = False }
             , test "handles an opening multiline string token" <|
                 \_ ->
                     { edited = "", remainder = "\"\"\"", inside = False }
-                        |> MultiLineStringParser.convertMultiLineStringsInner
+                        |> ElmAst.MultiLineString.convertMultiLineStringsInner
                         |> Expect.equal
                             { edited = "\"", remainder = "", inside = True }
             , test "handles a closing multiline string token" <|
                 \_ ->
                     { edited = "", remainder = "\"\"\"", inside = True }
-                        |> MultiLineStringParser.convertMultiLineStringsInner
+                        |> ElmAst.MultiLineString.convertMultiLineStringsInner
                         |> Expect.equal
                             { edited = "\"", remainder = "", inside = False }
             , test "replaces multiline string with single line string" <|
@@ -47,7 +47,7 @@ suite =
                     , remainder = "outside\noutside\"\"\"inside\ninside\"\"\"outside\noutside"
                     , inside = False
                     }
-                        |> MultiLineStringParser.convertMultiLineStringsInner
+                        |> ElmAst.MultiLineString.convertMultiLineStringsInner
                         |> Expect.equal
                             { edited = "outside\noutside\"inside\\ninside\"outside\noutside"
                             , remainder = ""
@@ -58,19 +58,19 @@ suite =
             [ test "converts newlines with escaped newlines when inside" <|
                 \_ ->
                     { edited = "", remainder = "\n", inside = True }
-                        |> MultiLineStringParser.chompNextToken (MultiLineStringParser.Other '\n')
+                        |> ElmAst.MultiLineString.chompNextToken (ElmAst.MultiLineString.Other '\n')
                         |> Expect.equal
                             { edited = "\\n", remainder = "", inside = True }
             , test "does not convert newline when outside" <|
                 \_ ->
                     { edited = "", remainder = "\n", inside = False }
-                        |> MultiLineStringParser.chompNextToken (MultiLineStringParser.Other '\n')
+                        |> ElmAst.MultiLineString.chompNextToken (ElmAst.MultiLineString.Other '\n')
                         |> Expect.equal
                             { edited = "\n", remainder = "", inside = False }
             , test "replaces multiline comment token with single double quote" <|
                 \_ ->
                     { edited = "", remainder = "\"\"\"", inside = False }
-                        |> MultiLineStringParser.chompNextToken (MultiLineStringParser.MultiLineComment)
+                        |> ElmAst.MultiLineString.chompNextToken (ElmAst.MultiLineString.MultiLineComment)
                         |> Expect.equal
                             { edited = "\"", remainder = "", inside = False }
             ]
@@ -78,39 +78,39 @@ suite =
             [ test "parses a multiline string token" <|
                 \_ ->
                     "\"\"\""
-                        |> MultiLineStringParser.getToken
-                        |> Expect.equal MultiLineStringParser.MultiLineComment
+                        |> ElmAst.MultiLineString.getToken
+                        |> Expect.equal ElmAst.MultiLineString.MultiLineComment
             , test "parses an EOF" <|
                 \_ ->
                     ""
-                        |> MultiLineStringParser.getToken
-                        |> Expect.equal MultiLineStringParser.EOF
+                        |> ElmAst.MultiLineString.getToken
+                        |> Expect.equal ElmAst.MultiLineString.EOF
             , test "parses any other char" <|
                 \_ ->
                     "x"
-                        |> MultiLineStringParser.getToken
-                        |> Expect.equal (MultiLineStringParser.Other 'x')
+                        |> ElmAst.MultiLineString.getToken
+                        |> Expect.equal (ElmAst.MultiLineString.Other 'x')
             , test "igores trailing text" <|
                 \_ ->
                     "xyz"
-                        |> MultiLineStringParser.getToken
-                        |> Expect.equal (MultiLineStringParser.Other 'x')
+                        |> ElmAst.MultiLineString.getToken
+                        |> Expect.equal (ElmAst.MultiLineString.Other 'x')
             ]
         , describe "chompHelp"
             [ test "chomps a multiline string token" <|
                 \_ ->
                     "\"\"\"testing 1 2 3"
-                        |> MultiLineStringParser.chompHelp MultiLineStringParser.MultiLineComment
+                        |> ElmAst.MultiLineString.chompHelp ElmAst.MultiLineString.MultiLineComment
                         |> Expect.equal { tokenStr = "\"\"\"", remainder = "testing 1 2 3" }
             , test "chomps an EOF" <|
                 \_ ->
                     ""
-                        |> MultiLineStringParser.chompHelp MultiLineStringParser.EOF
+                        |> ElmAst.MultiLineString.chompHelp ElmAst.MultiLineString.EOF
                         |> Expect.equal { tokenStr = "", remainder = "" }
             , test "chomps an other char" <|
                 \_ ->
                     "xyz"
-                        |> MultiLineStringParser.chompHelp (MultiLineStringParser.Other 'x')
+                        |> ElmAst.MultiLineString.chompHelp (ElmAst.MultiLineString.Other 'x')
                         |> Expect.equal { tokenStr = "x", remainder = "yz" }
             ]
         ]

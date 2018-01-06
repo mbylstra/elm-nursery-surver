@@ -1,20 +1,31 @@
-module ImportStatement exposing (..)
+module ElmAst.ImportStatement exposing (..)
 
 import Parser exposing (Count(AtLeast), Parser, zeroOrMore, (|.), (|=))
-import ElmTypesParser
-    exposing
-        ( qualifiedCapVar
-        , whitespace
-        , lowVar
-        , capVar
-        , someWhitespace
-        )
-import Types
-    exposing
-        ( ImportStatement
-        , Listing
-        )
+import ElmAst.Var exposing (capVar, lowVar, qualifiedCapVar)
+
+
+-- import ElmAst.Types
+--     exposing
+--         ( qualifiedCapVar
+--         , lowVar
+--         , capVar
+--         )
+
+import ElmAst.Helpers exposing (whitespace, someWhitespace)
 import List.Extra
+
+
+type alias ImportStatement =
+    { dottedModulePath : String
+    , maybeAlias : Maybe String
+    , exposedNames : Listing
+    }
+
+
+type alias Listing =
+    { explicits : List String
+    , open : Bool
+    }
 
 
 type alias StructuredRawName =

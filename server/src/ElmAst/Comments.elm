@@ -1,4 +1,4 @@
-module CommentsParser exposing (..)
+module ElmAst.Comments exposing (..)
 
 
 removeComments : String -> String

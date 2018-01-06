@@ -1,4 +1,4 @@
-module MultiLineStringParser exposing (..)
+module ElmAst.MultiLineString exposing (..)
 
 
 multiLineStringToken : String

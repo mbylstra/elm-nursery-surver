@@ -1,4 +1,4 @@
-module HelpersTest exposing (..)
+module HelpersTests exposing (..)
 
 import Expect exposing (Expectation, equalSets)
 import Test exposing (..)

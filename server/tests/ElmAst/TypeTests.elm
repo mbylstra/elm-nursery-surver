@@ -1,94 +1,34 @@
-module TypesParserTests exposing (..)
+module ElmAst.TypeTests exposing (..)
 
-import TypesParser
-    exposing
-        ( parseTypeAlias
-        , parseUnion
-        , parseTypeConstructor
-        , parseTypeConstructors
-        , someWhitespace
-        , Type(..)
-        , UnionR
-        , TypeAliasDefinitionR
-        )
+import ElmAst.Type exposing (Type(..), TypeAliasDefinitionR, UnionR, parseRecord, parseTypeAlias, parseTypeConstructor, parseTypeConstructors, parseUnion)
 import Expect exposing (Expectation, equalSets)
-import Parser exposing (Parser, (|.), (|=))
 import Result.Extra exposing (isErr)
 import Test exposing (..)
+import Parser
 
 
 suite : Test
 suite =
-    describe "TypesParser"
-        [ test "works" <|
+    describe "ElmAst.Type"
+        [ test "parses simple Int type" <|
             \_ ->
                 "Int"
-                    |> TypesParser.parseTipe
+                    |> ElmAst.Type.parseTipe
                     |> Expect.equal
                         (Ok <|
                             Type "Int" []
                         )
-
-        -- , test "complex one" <|
-        --     \_ ->
-        --         "(Int -> a) -> { x : Int, y : { z : String }}"
-        --             |> TypesParser.parse
-        --             |> toString
-        --             |> Expect.equal "asdasd"
-        -- , test "generateData" <|
-        --     \_ ->
-        --         "Int -> Bool -> Html Msg"
-        --             |> TypesParser.parseTipe
-        --             |> Result.map generateData
-        --             |> Expect.equal (Ok "1 True")
-        , test "someWhitespace 1" <|
+        , test "parseRecord" <|
             \_ ->
-                ""
-                    |> Parser.run someWhitespace
-                    |> isErr
-                    |> Expect.equal True
-        , test "someWhitespace 2" <|
-            \_ ->
-                "\n"
-                    |> Parser.run someWhitespace
-                    |> isErr
-                    |> Expect.equal False
-        , test "someWhitespace 3" <|
-            \_ ->
-                "\n\n"
-                    |> Parser.run someWhitespace
-                    |> isErr
-                    |> Expect.equal False
-
-        -- , test "someWhitespace 3" <|
-        --     \_ ->
-        --         "\n --comment"
-        --             |> Parser.run someWhitespace
-        --             |> isErr
-        --             |> Expect.equal False
-        -- , test "someWhitespace 4" <|
-        --     -- This is expected, but it should be improved so that a comment counts as whitespace
-        --     \_ ->
-        --         "--comment"
-        --             |> Parser.run someWhitespace
-        --             |> isErr
-        --             |> Expect.equal True
-        -- , test "record" <|
-        --     \_ ->
-        --         let
-        --             s =
-        --                 """
-        --           { email : String
-        --           , password : String
-        --           , loading : Bool
-        --           , error : Bool
-        --           }
-        --           """
-        --         in
-        --             s
-        --                 |> TypesParser.parse
-        --                 |> Result.map generateData
-        --                 |> Expect.equal (Ok "1 True")
+                let
+                    s =
+                        "{ email : String, password : String, loading : Bool, error : Bool }"
+                in
+                    s
+                        |> Parser.run ElmAst.Type.parseRecord
+                        |> Debug.log "result"
+                        |> isErr
+                        |> Expect.equal False
         , test "parse type alias" <|
             \_ ->
                 "type alias Id = Int"

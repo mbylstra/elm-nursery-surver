@@ -1,4 +1,4 @@
-module ImportStatementTest exposing (..)
+module ImportStatementTests exposing (..)
 
 import ImportStatement
     exposing

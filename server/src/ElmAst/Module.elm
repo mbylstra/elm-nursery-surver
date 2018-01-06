@@ -1,21 +1,39 @@
-module ModuleParser exposing (..)
+module ElmAst.Module exposing (..)
 
 import String.Extra
-import ElmTypesParser exposing (parseTypeAlias, parseTypeAnnotation, parseUnion)
-import ImportStatement exposing (importStatement, parseImportStatement)
-import ModuleStatement exposing (parseModuleStatement)
-import CommentsParser
-import MultiLineStringParser
-import Parser
-import Types
+import ElmAst.Type
     exposing
-        ( Block(Import, IgnoreBlock, TypeAliasDefinition, Union, TypeAnnotation, Module)
-        , ImportStatement
-        , ModuleStatement
-        , TypeAliasDefinitionR
-        , UnionR
+        ( TypeAliasDefinitionR
         , TypeAnnotation
+        , UnionR
+        , parseTypeAlias
+        , parseTypeAnnotation
+        , parseUnion
         )
+
+
+-- import ImportStatement exposing (importStatement, parseImportStatement)
+-- import ElmAst.ModuleStatement exposing (parseModuleStatement)
+
+import ElmAst.Comments
+import ElmAst.MultiLineString
+
+
+-- import Parser
+
+import ElmAst.ImportStatement as ImportStatement exposing (ImportStatement)
+
+
+-- import Type
+--     exposing
+--         ( Block(Import, IgnoreBlock, TypeAliasDefinition, Union, TypeAnnotation, Module)
+--         , ImportStatement
+--         , ModuleStatement
+--         , TypeAliasDefinitionR
+--         , UnionR
+--         , TypeAnnotation
+--         )
+
 import Maybe.Extra exposing (isJust)
 
 
@@ -45,34 +63,30 @@ type RawBlocks
 --     , viewFunctions : ViewFunctions
 --     , externalNamesModuleInfo : ExternalNamesModuleInfo
 --     }
-
-
-parseModuleStub : Result String Ast
-parseModuleStub =
-    Ok
-        { dottedModulePath = ""
-        , importStatements = []
-        , typeAliaseDefinitions = []
-        , typeDefinitions = []
-        , typeAnnotations = []
-        }
-
-
-parseModule : String -> Result String Ast
-parseModule source =
-    let
-        wip =
-            source
-                |> preProcessSource
-    in
-        parseModuleStub
+-- parseModuleStub : Result String Ast
+-- parseModuleStub =
+--     Ok
+--         { dottedModulePath = ""
+--         , importStatements = []
+--         , typeAliaseDefinitions = []
+--         , typeDefinitions = []
+--         , typeAnnotations = []
+--         }
+-- parseModule : String -> Result String Ast
+-- parseModule source =
+--     let
+--         wip =
+--             source
+--                 |> preProcessSource
+--     in
+--         parseModuleStub
 
 
 preProcessSource : String -> String
 preProcessSource source =
     source
-        |> MultiLineStringParser.convertMultiLineStrings
-        |> CommentsParser.removeComments
+        |> ElmAst.MultiLineString.convertMultiLineStrings
+        |> ElmAst.Comments.removeComments
         |> removeEmptyLines
 
 

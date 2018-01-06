@@ -3,7 +3,7 @@ module ViewFunctionDetector exposing (..)
 import Types exposing (Type(..))
 
 
-{-| This is a *really* dumb version to begine with that looks for the existence of Html
+{-| This is a *really* dumb version to begin with that looks for the existence of Html
 -}
 isViewFunction : Type -> Bool
 isViewFunction tipe =

@@ -1,11 +1,11 @@
-module ModuleParserTests exposing (..)
+module ElmAst.ModuleTests exposing (..)
 
 import Expect exposing (Expectation, equalSets)
 import Test exposing (..)
-import ModuleParser
+import ElmAst.Module
 
 
--- import ModuleParser
+-- import ElmAst.Module
 --     exposing
 --         ( parseModule
 --         , removeOneLineComments
@@ -16,21 +16,21 @@ import ModuleParser
 
 suite : Test
 suite =
-    describe "ModuleParser.elm"
+    describe "ElmAst.Module.elm"
         -- [ describe "parseModule"
         --     [ test "parses the module statement if there is one" <|
         --         \_ ->
         --             joinNl
         --                 [ "module Module1 exposing (..)"
         --                 ]
-        --                 |> ModuleParser.parseModule
+        --                 |> ElmAst.Module.parseModule
         --                 |> Expect.equal (Ok { emptyAst | dottedModulePath = "Module1" })
         --     , test " if  is no module statement, don't fail, but assume module Main exposing (..)" <|
         --         \_ ->
         --             joinNl
         --                 [ "x = 2"
         --                 ]
-        --                 |> ModuleParser.parseModule
+        --                 |> ElmAst.Module.parseModule
         --                 |> Expect.equal (Ok { emptyAst | dottedModulePath = "Main" })
         --     , test "parses an import statement if there is one" <|
         --         \_ ->
@@ -38,7 +38,7 @@ suite =
         --                 [ "module Module1 exposing (..)"
         --                 , "import Foo"
         --                 ]
-        --                 |> ModuleParser.parseModule
+        --                 |> ElmAst.Module.parseModule
         --                 |> Expect.equal (Ok { emptyAst | dottedModulePath = "Module1" })
         --     ]
         [ describe "preProcessSource" <|
@@ -52,7 +52,7 @@ suite =
                         , "hello"
                         , "\"\"\""
                         ]
-                        |> ModuleParser.preProcessSource
+                        |> ElmAst.Module.preProcessSource
                         |> Expect.equal "x = 1 \nz = \"\\nhello\\n\""
             ]
         , describe "removeEmptyLines" <|
@@ -65,7 +65,7 @@ suite =
                         , "\t"
                         , "b"
                         ]
-                        |> ModuleParser.removeEmptyLines
+                        |> ElmAst.Module.removeEmptyLines
                         |> Expect.equal "a\nb"
             ]
         , describe "splitIntoBlocks"
@@ -80,7 +80,7 @@ suite =
                         , "  #"
                         , "#"
                         ]
-                        |> ModuleParser.splitIntoRawBlocks
+                        |> ElmAst.Module.splitIntoRawBlocks
                         |> Expect.equal
                             [ "#"
                             , "#\n #"
@@ -92,43 +92,43 @@ suite =
             [ test "classifies module statements" <|
                 \_ ->
                     "module Main exposing (..)"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.ModuleStatementBlock "module Main exposing (..)")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.ModuleStatementBlock "module Main exposing (..)")
             , test "classifies port module statements" <|
                 \_ ->
                     "port module Main exposing (..)"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.ModuleStatementBlock "port module Main exposing (..)")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.ModuleStatementBlock "port module Main exposing (..)")
             , test "classifies import statements" <|
                 \_ ->
                     "import Foo"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.ImportStatementBlock "import Foo")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.ImportStatementBlock "import Foo")
             , test "classifies type alias definitions" <|
                 \_ ->
                     "type alias Foo = Bar"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.TypeAliasDefinitionBlock "type alias Foo = Bar")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.TypeAliasDefinitionBlock "type alias Foo = Bar")
             , test "classifies type definitions" <|
                 \_ ->
                     "type Id = Id String"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.TypeDefinitionBlock "type Id = Id String")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.TypeDefinitionBlock "type Id = Id String")
             , test "classifies type annotations" <|
                 \_ ->
                     "view : Model -> Html msg"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.TypeAnnotationBlock "view : Model -> Html msg")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.TypeAnnotationBlock "view : Model -> Html msg")
             , test "classifies function definitions" <|
                 \_ ->
                     "x = 1"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.FunctionDefinitionBlock "x = 1")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.FunctionDefinitionBlock "x = 1")
             , test "classifies a port definition block as something we want to ignore" <|
                 \_ ->
                     "port check : String -> Cmd msg"
-                        |> ModuleParser.classifyRawBlock
-                        |> Expect.equal (ModuleParser.IgnoreBlock "port check : String -> Cmd msg")
+                        |> ElmAst.Module.classifyRawBlock
+                        |> Expect.equal (ElmAst.Module.IgnoreBlock "port check : String -> Cmd msg")
             , test "doesn't get tripped up by a function with a : in it" <|
                 \_ ->
                     let
@@ -139,8 +139,8 @@ suite =
                                 ]
                     in
                         block
-                            |> ModuleParser.classifyRawBlock
-                            |> Expect.equal (ModuleParser.FunctionDefinitionBlock block)
+                            |> ElmAst.Module.classifyRawBlock
+                            |> Expect.equal (ElmAst.Module.FunctionDefinitionBlock block)
             ]
 
         -- , describe "splitIntoRawBlocks"
@@ -151,10 +151,10 @@ suite =
         --                   [ "module Module1 exposing (..)"
         --                   , type
         --             in
-        --                 ModuleParser.splitIntoRawBlocks code
+        --                 ElmAst.Module.splitIntoRawBlocks code
         --                     |> Expect.equal something
         --     ]
-        -- describe "ModuleParser.elm"
+        -- describe "ElmAst.Module.elm"
         --     [ describe "parseModule"
         --         [ test "basic test" <|
         --             \_ ->
@@ -168,8 +168,8 @@ suite =
         --                     |> splitIntoBlocks
         --                     |> classifyBlocks
         --                     |> Expect.equal
-        --                         [ ModuleParser.ModuleStatementBlock "module Main exposing (..)"
-        --                         , ModuleParser.TypeDefinition "type Result error value = Ok value | Err error"
+        --                         [ ElmAst.Module.ModuleStatementBlock "module Main exposing (..)"
+        --                         , ElmAst.Module.TypeDefinition "type Result error value = Ok value | Err error"
         --                         ]
         --         , test "test with multi line comments" <|
         --             \_ ->
@@ -185,10 +185,10 @@ suite =
         --                     |> splitIntoBlocks
         --                     |> classifyBlocks
         --                     |> Expect.equal
-        --                         [ ModuleParser.EmptyLines "{-| A `Result` is either `Ok` meaning the computation succeeded, or it is an"
-        --                         , ModuleParser.EmptyLines "`Err` meaning that there was some failure."
-        --                         , ModuleParser.EmptyLines "-}"
-        --                         , ModuleParser.TypeDefinition "type Result error value = Ok value | Err error"
+        --                         [ ElmAst.Module.EmptyLines "{-| A `Result` is either `Ok` meaning the computation succeeded, or it is an"
+        --                         , ElmAst.Module.EmptyLines "`Err` meaning that there was some failure."
+        --                         , ElmAst.Module.EmptyLines "-}"
+        --                         , ElmAst.Module.TypeDefinition "type Result error value = Ok value | Err error"
         --                         ]
         --         ]
         -- This is basically too annoying to test - we just want to know that right functions are
@@ -197,25 +197,25 @@ suite =
         --
         --     [ test "EmptyLines" <|
         --         \_ ->
-        --             ModuleParser.parseBlock (ModuleParser.EmptyLines "\n\n")
+        --             ElmAst.Module.parseBlock (ElmAst.Module.EmptyLines "\n\n")
         --                 |> Expect.equal (Ok Types.IgnoreBlock)
         --     , test "ImportStatementBlock" <|
         --         \_ ->
-        --             ModuleParser.parseBlock (ModuleParser.ImportStatementBlock "\n\n")
+        --             ElmAst.Module.parseBlock (ElmAst.Module.ImportStatementBlock "\n\n")
         --                 |> Expect.equal (Ok Types.Import)
         --     ]
         -- , describe "replaceNewLinesWithSpaces"
         --     [ test "that they are replaced with spaces :)" <|
         --         \_ ->
-        --             ModuleParser.replaceNewLinesWithSpaces
-        --                 (ModuleParser.replaceNewLinesWithSpaces "one\ntwo\n")
+        --             ElmAst.Module.replaceNewLinesWithSpaces
+        --                 (ElmAst.Module.replaceNewLinesWithSpaces "one\ntwo\n")
         --                 |> Expect.equal "one two "
         --     ]
         ]
 
 
 
--- emptyAst : ModuleParser.Ast
+-- emptyAst : ElmAst.Module.Ast
 -- emptyAst =
 --     { dottedModulePath = "Module1"
 --     , importStatements = []

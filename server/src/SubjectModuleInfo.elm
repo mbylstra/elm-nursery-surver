@@ -16,7 +16,6 @@ import Types
         )
 import Dict exposing (Dict)
 import ViewFunctionDetector exposing (isViewFunction)
-import FirstPass
 import ModuleInfo
     exposing
         ( LocalTypeDefinitions

@@ -1,30 +1,30 @@
-module CommentsParserTests exposing (..)
+module ElmAst.CommentsTests exposing (..)
 
 import Expect exposing (Expectation, equalSets)
 import Test exposing (..)
-import CommentsParser
+import ElmAst.Comments
 
 
 suite : Test
 suite =
-    describe "CommentsParser.elm"
+    describe "ElmAst.Comments.elm"
         [ describe "removeComments"
             [ test "the comment trick works - not commented out" <|
                 \_ ->
                     "{--} add x y = x + y --}"
-                        |> CommentsParser.removeComments
+                        |> ElmAst.Comments.removeComments
                         |> Expect.equal " add x y = x + y "
             , test "the comment trick works - commented out" <|
                 \_ ->
                     "{-- add x y = x + y --}"
-                        |> CommentsParser.removeComments
+                        |> ElmAst.Comments.removeComments
                         |> Expect.equal ""
             ]
         , describe "removeMultiLineComments"
             [ test "works on a simple case" <|
                 \_ ->
                     "foo {- bar -} baz"
-                        |> CommentsParser.removeMultiLineComments
+                        |> ElmAst.Comments.removeMultiLineComments
                         |> Expect.equal
                             "foo  baz"
             ]
@@ -32,61 +32,61 @@ suite =
             [ test "stops recursing on EOF" <|
                 \_ ->
                     { edited = "", remainder = "", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "", remainder = "", level = 0 }
             , test "handles a single char" <|
                 \_ ->
                     { edited = "", remainder = "x", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "x", remainder = "", level = 0 }
             , test "handles an opening comment" <|
                 \_ ->
                     { edited = "", remainder = "{-", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "", remainder = "", level = 1 }
             , test "handles a closing comment" <|
                 \_ ->
                     { edited = "", remainder = "-}", level = 1 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "", remainder = "", level = 0 }
             , test "removes a regular comment" <|
                 \_ ->
                     { edited = "", remainder = "a{-b-}c", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "ac", remainder = "", level = 0 }
             , test "removes a doc comment" <|
                 \_ ->
                     { edited = "", remainder = "a{-|b-}c", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "ac", remainder = "", level = 0 }
             , test "removes a nested comment" <|
                 \_ ->
                     { edited = "", remainder = "a{-{-b-}-}c", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "ac", remainder = "", level = 0 }
             , test "does not get tripped up by records" <|
                 \_ ->
                     { edited = "", remainder = "type alias Foo = {a:Int,b:Int}", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "type alias Foo = {a:Int,b:Int}", remainder = "", level = 0 }
             , test "handles extra dashes" <|
                 \_ ->
                     { edited = "", remainder = "{--}", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "", remainder = "", level = 0 }
             , test "level is always positive" <|
                 \_ ->
                     { edited = "", remainder = "-}", level = 0 }
-                        |> CommentsParser.removeMultiLineCommentsInner
+                        |> ElmAst.Comments.removeMultiLineCommentsInner
                         |> Expect.equal
                             { edited = "-}", remainder = "", level = 0 }
             ]
@@ -94,40 +94,40 @@ suite =
             [ test "parses a CommentOpener" <|
                 \_ ->
                     "{-"
-                        |> CommentsParser.getToken
-                        |> Expect.equal CommentsParser.CommentOpener
+                        |> ElmAst.Comments.getToken
+                        |> Expect.equal ElmAst.Comments.CommentOpener
             , test "parses a CommentCloser" <|
                 \_ ->
                     "-}"
-                        |> CommentsParser.getToken
-                        |> Expect.equal CommentsParser.CommentCloser
+                        |> ElmAst.Comments.getToken
+                        |> Expect.equal ElmAst.Comments.CommentCloser
             , test "parses an EOF" <|
                 \_ ->
                     ""
-                        |> CommentsParser.getToken
-                        |> Expect.equal CommentsParser.EOF
+                        |> ElmAst.Comments.getToken
+                        |> Expect.equal ElmAst.Comments.EOF
             , test "parses any other char" <|
                 \_ ->
                     "x"
-                        |> CommentsParser.getToken
-                        |> Expect.equal (CommentsParser.Other 'x')
+                        |> ElmAst.Comments.getToken
+                        |> Expect.equal (ElmAst.Comments.Other 'x')
             , test "igores trailing text" <|
                 \_ ->
                     "xyz"
-                        |> CommentsParser.getToken
-                        |> Expect.equal (CommentsParser.Other 'x')
+                        |> ElmAst.Comments.getToken
+                        |> Expect.equal (ElmAst.Comments.Other 'x')
             ]
         , describe "chompNextToken"
             [ test "chomps a single char when at level 0" <|
                 \_ ->
                     { edited = "", remainder = "xyz", level = 0 }
-                        |> CommentsParser.chompNextToken (CommentsParser.Other 'x')
+                        |> ElmAst.Comments.chompNextToken (ElmAst.Comments.Other 'x')
                         |> Expect.equal
                             { edited = "x", remainder = "yz", level = 0 }
             , test "does not include single char when at level 1" <|
                 \_ ->
                     { edited = "", remainder = "xyz", level = 1 }
-                        |> CommentsParser.chompNextToken (CommentsParser.Other 'x')
+                        |> ElmAst.Comments.chompNextToken (ElmAst.Comments.Other 'x')
                         |> Expect.equal
                             { edited = "", remainder = "yz", level = 1 }
             ]
@@ -135,39 +135,39 @@ suite =
             [ test "chomps a CommentOpener" <|
                 \_ ->
                     "{- testing 1 2 3"
-                        |> CommentsParser.chompHelp CommentsParser.CommentOpener
+                        |> ElmAst.Comments.chompHelp ElmAst.Comments.CommentOpener
                         |> Expect.equal { tokenStr = "{-", remainder = " testing 1 2 3" }
             , test "chomps a CommentCloser" <|
                 \_ ->
                     "-} testing 1 2 3"
-                        |> CommentsParser.chompHelp CommentsParser.CommentCloser
+                        |> ElmAst.Comments.chompHelp ElmAst.Comments.CommentCloser
                         |> Expect.equal { tokenStr = "-}", remainder = " testing 1 2 3" }
             , test "chomps an EOF" <|
                 \_ ->
                     ""
-                        |> CommentsParser.chompHelp CommentsParser.EOF
+                        |> ElmAst.Comments.chompHelp ElmAst.Comments.EOF
                         |> Expect.equal { tokenStr = "", remainder = "" }
             , test "chomps an other char" <|
                 \_ ->
                     "xyz"
-                        |> CommentsParser.chompHelp (CommentsParser.Other 'x')
+                        |> ElmAst.Comments.chompHelp (ElmAst.Comments.Other 'x')
                         |> Expect.equal { tokenStr = "x", remainder = "yz" }
             ]
         , describe "removeOneLineComments" <|
             [ test "removes a single trailing one line comment from one line" <|
                 \_ ->
                     "abc --testing 1 2 3"
-                        |> CommentsParser.removeOneLineComments
+                        |> ElmAst.Comments.removeOneLineComments
                         |> Expect.equal "abc "
             , test "removes comments from multiple lines" <|
                 \_ ->
                     "abc --testing 1 2 3\ndef --testing 4 5 6"
-                        |> CommentsParser.removeOneLineComments
+                        |> ElmAst.Comments.removeOneLineComments
                         |> Expect.equal "abc \ndef "
             , test "removes multiple comments on the one line" <|
                 \_ ->
                     "abc --testing 1 2 3 --testing 1 2 3"
-                        |> CommentsParser.removeOneLineComments
+                        |> ElmAst.Comments.removeOneLineComments
                         |> Expect.equal "abc "
             ]
         ]
