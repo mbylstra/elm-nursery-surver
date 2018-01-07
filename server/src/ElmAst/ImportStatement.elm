@@ -1,14 +1,14 @@
 module ElmAst.ImportStatement exposing (..)
 
 import Parser exposing (Count(AtLeast), Parser, zeroOrMore, (|.), (|=))
-import ElmAst.Var exposing (capVar, lowVar, qualifiedCapVar)
+import ElmAst.Name exposing (capitalizedName, lowerCaseName, qualifiedCapitalizedName)
 
 
 -- import ElmAst.Types
 --     exposing
---         ( qualifiedCapVar
---         , lowVar
---         , capVar
+--         ( qualifiedCapitalizedName
+--         , lowerCaseName
+--         , capitalizedName
 --         )
 
 import ElmAst.Helpers exposing (whitespace, someWhitespace)
@@ -68,7 +68,7 @@ importStatementName =
     Parser.succeed identity
         |. Parser.symbol "import"
         |. someWhitespace
-        |= qualifiedCapVar
+        |= qualifiedCapitalizedName
 
 
 importAlias : Parser (Maybe String)
@@ -79,7 +79,7 @@ importAlias =
                 Parser.succeed (\name -> Just name)
                     |. Parser.symbol "as"
                     |. someWhitespace
-                    |= qualifiedCapVar
+                    |= qualifiedCapitalizedName
 
         noAlias =
             Parser.succeed Nothing
@@ -129,7 +129,7 @@ explicitExposedNames =
 
 exposedType : Parser String
 exposedType =
-    Parser.oneOf [ unionTypeWithAllConstructors, lowVar, capVar ]
+    Parser.oneOf [ unionTypeWithAllConstructors, lowerCaseName, capitalizedName ]
 
 
 
@@ -142,13 +142,13 @@ unionTypeWithAllConstructors =
     -- the parser to be used with oneOf (as |. and |= do not backtrack)
     Parser.delayedCommitMap
         (\name _ -> name)
-        capVar
+        capitalizedName
         (Parser.symbol "(..)")
 
 
 lowOrCapVar : Parser String
 lowOrCapVar =
-    Parser.oneOf [ lowVar, capVar ]
+    Parser.oneOf [ lowerCaseName, capitalizedName ]
 
 
 openListing : Listing

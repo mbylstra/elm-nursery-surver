@@ -15,7 +15,7 @@ check out the source code and go from there. It's not too tough!
 import Parser exposing (Count(AtLeast), Parser, zeroOrMore, (|.), (|=))
 import Parser.LanguageKit as Parser
 import ElmAst.Helpers exposing (someWhitespace, spaces, isSpace, whitespace)
-import ElmAst.Var as Var
+import ElmAst.Name exposing (lowerCaseName, capitalizedName, qualifiedCapitalizedName)
 
 
 type Type
@@ -90,7 +90,7 @@ parseTypeAnnotation string =
 typeAnnotation : Parser TypeAnnotation
 typeAnnotation =
     Parser.succeed (,)
-        |= Var.lowVar
+        |= lowerCaseName
         |. someWhitespace
         |. Parser.symbol ":"
         |. someWhitespace
@@ -133,9 +133,9 @@ tipeTerm =
     Parser.lazy <|
         \_ ->
             Parser.oneOf
-                [ Parser.map Var Var.lowVar
+                [ Parser.map Var lowerCaseName
                 , Parser.succeed Type
-                    |= Var.qualifiedCapVar
+                    |= qualifiedCapitalizedName
                     |= chompArgs []
                 , parseRecord
                 , tuple
@@ -156,8 +156,8 @@ term =
     Parser.lazy <|
         \_ ->
             Parser.oneOf
-                [ Parser.map Var Var.lowVar
-                , Parser.map (flip Type []) Var.qualifiedCapVar
+                [ Parser.map Var lowerCaseName
+                , Parser.map (flip Type []) qualifiedCapitalizedName
                 , parseRecord
                 , tuple
                 ]
@@ -191,7 +191,7 @@ extension =
 ext : Parser (Maybe String)
 ext =
     Parser.succeed Just
-        |= Var.lowVar
+        |= lowerCaseName
         |. spaces
         |. Parser.symbol "|"
         |. spaces
@@ -202,7 +202,7 @@ field =
     Parser.lazy <|
         \_ ->
             Parser.succeed (,)
-                |= Var.lowVar
+                |= lowerCaseName
                 |. spaces
                 |. Parser.symbol ":"
                 |. spaces
@@ -269,7 +269,7 @@ typeAlias =
     Parser.succeed TypeAliasDefinitionR
         |. Parser.symbol "type alias"
         |. someWhitespace
-        |= Var.capVar
+        |= capitalizedName
         |. someWhitespace
         |= parseTypeVariables
         |. Parser.symbol "="
@@ -297,7 +297,7 @@ unionType =
     Parser.succeed UnionR
         |. Parser.symbol "type"
         |. someWhitespace
-        |= Var.capVar
+        |= capitalizedName
         |. someWhitespace
         |= parseTypeVariables
         |. Parser.symbol "="
@@ -311,7 +311,7 @@ parseTypeVariables =
         zeroOrMore
         (Parser.delayedCommitMap
             (\typeVar _ -> typeVar)
-            Var.lowVar
+            lowerCaseName
             someWhitespace
         )
 
@@ -353,7 +353,7 @@ parseTypeConstructor source =
 typeConstructor : Parser TypeConstructor
 typeConstructor =
     Parser.succeed (,)
-        |= Var.capVar
+        |= capitalizedName
         |= typeConstructorArgs
 
 
@@ -397,6 +397,6 @@ typeConstructorArg =
     Parser.oneOf
         [ parseRecord
         , tuple
-        , Var.lowVar |> Parser.map Var
-        , Var.qualifiedCapVar |> Parser.map (\name -> Type name [])
+        , lowerCaseName |> Parser.map Var
+        , qualifiedCapitalizedName |> Parser.map (\name -> Type name [])
         ]

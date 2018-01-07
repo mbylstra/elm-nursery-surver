@@ -1,6 +1,6 @@
-module ElmAst.VarTests exposing (..)
+module ElmAst.NameTests exposing (..)
 
-import ElmAst.Var as Var
+import ElmAst.Name as Name
 import Expect exposing (Expectation, equalSets)
 import Test exposing (..)
 import Parser exposing (Parser, (|.), (|=))
@@ -10,52 +10,52 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "ElmAst.Var"
-        [ describe "lowVar"
+    describe "ElmAst.Name"
+        [ describe "lowerCaseName"
             [ test "it passes" <|
                 \_ ->
                     "foo"
-                        |> Parser.run Var.lowVar
+                        |> Parser.run Name.lowerCaseName
                         |> Expect.equal
                             (Ok "foo")
             , test "it fails" <|
                 \_ ->
                     "Foo"
-                        |> Parser.run Var.lowVar
+                        |> Parser.run Name.lowerCaseName
                         |> isErr
                         |> Expect.equal True
             ]
-        , describe "capVar"
+        , describe "capitalizedName"
             [ test "it passes" <|
                 \_ ->
                     "Foo"
-                        |> Parser.run Var.capVar
+                        |> Parser.run Name.capitalizedName
                         |> Expect.equal
                             (Ok "Foo")
             , test "it fails" <|
                 \_ ->
                     "foo"
-                        |> Parser.run Var.capVar
+                        |> Parser.run Name.capitalizedName
                         |> isErr
                         |> Expect.equal True
             ]
-        , describe "qualifiedCapVar"
+        , describe "qualifiedCapitalizedName"
             [ test "it passes" <|
                 \_ ->
                     "Foo.Bar"
-                        |> Parser.run Var.qualifiedCapVar
+                        |> Parser.run Name.qualifiedCapitalizedName
                         |> Expect.equal
                             (Ok "Foo.Bar")
             , test "not qualified passes" <|
                 \_ ->
                     "Foo"
-                        |> Parser.run Var.qualifiedCapVar
+                        |> Parser.run Name.qualifiedCapitalizedName
                         |> Expect.equal
                             (Ok "Foo")
             , test "it fails" <|
                 \_ ->
                     "Foo.bar"
-                        |> Parser.run Var.qualifiedCapVar
+                        |> Parser.run Name.qualifiedCapitalizedName
                         |> isErr
                         |> Expect.equal True
             ]
