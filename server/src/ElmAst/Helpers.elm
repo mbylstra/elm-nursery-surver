@@ -21,3 +21,32 @@ isSpace char =
 whitespace : Parser ()
 whitespace =
     Parser.ignore zeroOrMore isSpace
+
+
+oneOrMoreSeparatedByComma : Parser a -> Parser (List a)
+oneOrMoreSeparatedByComma parser =
+    parser
+        |> Parser.andThen (\first -> oneOrMoreSeparatedByCommaHelp parser [ first ])
+
+
+oneOrMoreSeparatedByCommaHelp : Parser a -> List a -> Parser (List a)
+oneOrMoreSeparatedByCommaHelp parser revList =
+    Parser.oneOf
+        [ commaAnd parser
+            |> Parser.andThen (\a -> oneOrMoreSeparatedByCommaHelp parser (a :: revList))
+        , Parser.succeed (List.reverse revList)
+        ]
+
+
+commaAnd : Parser a -> Parser a
+commaAnd parser =
+    Parser.delayedCommit spaces <|
+        Parser.succeed identity
+            |. comma
+            |. spaces
+            |= parser
+
+
+comma : Parser ()
+comma =
+    Parser.symbol ","

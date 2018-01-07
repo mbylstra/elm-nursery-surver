@@ -14,7 +14,7 @@ check out the source code and go from there. It's not too tough!
 
 import Parser exposing (Count(AtLeast), Parser, zeroOrMore, (|.), (|=))
 import Parser.LanguageKit as Parser
-import ElmAst.Helpers exposing (someWhitespace, spaces, isSpace, whitespace)
+import ElmAst.Helpers exposing (someWhitespace, spaces, isSpace, whitespace, oneOrMoreSeparatedByComma)
 import ElmAst.Name exposing (lowerCaseName, capitalizedName, qualifiedCapitalizedName)
 
 
@@ -175,7 +175,7 @@ parseRecord =
                 |. Parser.symbol "{"
                 |. spaces
                 |= extension
-                |= commaSep field
+                |= oneOrMoreSeparatedByComma field
                 |. spaces
                 |. Parser.symbol "}"
 
@@ -227,35 +227,6 @@ tuplize args =
 
         _ ->
             Tuple args
-
-
-commaSep : Parser a -> Parser (List a)
-commaSep parser =
-    parser
-        |> Parser.andThen (\first -> commaSepHelp parser [ first ])
-
-
-commaSepHelp : Parser a -> List a -> Parser (List a)
-commaSepHelp parser revList =
-    Parser.oneOf
-        [ commaAnd parser
-            |> Parser.andThen (\a -> commaSepHelp parser (a :: revList))
-        , Parser.succeed (List.reverse revList)
-        ]
-
-
-commaAnd : Parser a -> Parser a
-commaAnd parser =
-    Parser.delayedCommit spaces <|
-        Parser.succeed identity
-            |. comma
-            |. spaces
-            |= parser
-
-
-comma : Parser ()
-comma =
-    Parser.symbol ","
 
 
 
