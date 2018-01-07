@@ -1,41 +1,30 @@
 module ElmAst.ModuleStatement exposing (..)
 
-import Parser exposing (Count(AtLeast), Parser, zeroOrMore, (|.), (|=))
+import ElmAst.Helpers exposing (someWhitespace)
+import ElmAst.Name exposing (qualifiedCapitalizedName)
+import Parser exposing (oneOf, symbol, run, succeed, Count(AtLeast), Parser, zeroOrMore, (|.), (|=), Error)
 
 
--- import ElmAst.Types
---     exposing
---         ( qualifiedCapVar
---         , whitespace
---         , lowVar
---         , capVar
---         )
--- import Types
---     exposing
---         ( ModuleStatement
---         , Listing
---         )
-
-
-type alias RawDottedName =
+{-| it's just the dotted module name for now
+-}
+type alias ModuleStatement =
     String
 
 
+parseModuleStatement : String -> Result Error ModuleStatement
+parseModuleStatement string =
+    run importStatement string
 
--- parseModuleStatement : String -> Result Parser.Error ModuleStatement
--- parseModuleStatement string =
---     Parser.run importStatement string
---
---
--- importStatement : Parser ModuleStatement
--- importStatement =
---     Parser.succeed identity
---         |= importStatementName
---
---
--- importStatementName : Parser String
--- importStatementName =
---     Parser.succeed identity
---         |. Parser.symbol "module"
---         |. someWhitespace
---         |= qualifiedCapVar
+
+importStatement : Parser ModuleStatement
+importStatement =
+    succeed identity
+        |= importStatementName
+
+
+importStatementName : Parser String
+importStatementName =
+    succeed identity
+        |. oneOf [ symbol "module", symbol "port module" ]
+        |. someWhitespace
+        |= qualifiedCapitalizedName

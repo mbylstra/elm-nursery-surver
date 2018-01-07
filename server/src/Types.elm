@@ -12,12 +12,6 @@ import Dict exposing (Dict)
 --     | IgnoreBlock
 
 
-{-| it's just the dotted module name for now
--}
-type alias ModuleStatement =
-    String
-
-
 type alias QualifiedName =
     { dottedModulePath : String, name : String }
 
