@@ -137,7 +137,7 @@ tipeTerm =
                 , Parser.succeed Type
                     |= qualifiedCapitalizedName
                     |= chompArgs []
-                , parseRecord
+                , record
                 , tuple
                 ]
 
@@ -158,7 +158,7 @@ term =
             Parser.oneOf
                 [ Parser.map Var lowerCaseName
                 , Parser.map (flip Type []) qualifiedCapitalizedName
-                , parseRecord
+                , record
                 , tuple
                 ]
 
@@ -167,8 +167,8 @@ term =
 -- RECORDS
 
 
-parseRecord : Parser Type
-parseRecord =
+record : Parser Type
+record =
     Parser.lazy <|
         \_ ->
             Parser.succeed (flip Record)
@@ -242,7 +242,7 @@ typeAlias =
         |. someWhitespace
         |= capitalizedName
         |. someWhitespace
-        |= parseTypeVariables
+        |= typeVariables
         |. Parser.symbol "="
         |. someWhitespace
         |= tipe
@@ -270,14 +270,14 @@ unionType =
         |. someWhitespace
         |= capitalizedName
         |. someWhitespace
-        |= parseTypeVariables
+        |= typeVariables
         |. Parser.symbol "="
         |. someWhitespace
         |= typeConstructors
 
 
-parseTypeVariables : Parser (List String)
-parseTypeVariables =
+typeVariables : Parser (List String)
+typeVariables =
     Parser.repeat
         zeroOrMore
         (Parser.delayedCommitMap
@@ -366,7 +366,7 @@ typeConstructorArgsExtraOne =
 typeConstructorArg : Parser Type
 typeConstructorArg =
     Parser.oneOf
-        [ parseRecord
+        [ record
         , tuple
         , lowerCaseName |> Parser.map Var
         , qualifiedCapitalizedName |> Parser.map (\name -> Type name [])

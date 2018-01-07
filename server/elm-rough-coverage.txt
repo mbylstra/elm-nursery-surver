@@ -1,6 +1,8 @@
-tests/FirstPassTest.elm src/FirstPass.elm
-tests/HelpersTest.elm src/Helpers.elm
-tests/ImportStatementTest.elm src/ImportStatement.elm
-tests/ModuleInfoTest.elm src/ModuleInfo.elm
-tests/ReadSourceFilesTest.elm src/ReadSourceFiles.elm
-tests/ElmTypesParserTest.elm src/ElmTypesParser.elm
+tests/ElmAst/CommentsTests.elm src/ElmAst/Comments.elm
+tests/ElmAst/HelpersTests.elm src/ElmAst/Helpers.elm
+tests/ElmAst/ImportStatementTests.elm src/ElmAst/ImportStatement.elm
+tests/ElmAst/ModuleTests.elm src/ElmAst/Module.elm
+tests/ElmAst/ModuleStatementTests.elm src/ElmAst/ModuleStatement.elm
+tests/ElmAst/MultiLineStringTests.elm src/ElmAst/MultiLineString.elm
+tests/ElmAst/NameTests.elm src/ElmAst/Name.elm
+tests/ElmAst/TypeTests.elm src/ElmAst/Type.elm

@@ -1,6 +1,6 @@
 module ElmAst.HelpersTests exposing (..)
 
-import ElmAst.Helpers exposing (someWhitespace)
+import ElmAst.Helpers exposing (someWhitespace, oneOrMoreSeparatedByComma)
 import Expect exposing (Expectation, equalSets)
 import Parser exposing (Parser, (|.), (|=))
 import Result.Extra exposing (isErr)
@@ -10,36 +10,50 @@ import Test exposing (..)
 suite : Test
 suite =
     describe "ParserHelpers"
-        [ test "someWhitespace 1" <|
-            \_ ->
-                ""
-                    |> Parser.run someWhitespace
-                    |> isErr
-                    |> Expect.equal True
-        , test "someWhitespace 2" <|
-            \_ ->
-                "\n"
-                    |> Parser.run someWhitespace
-                    |> isErr
-                    |> Expect.equal False
-        , test "someWhitespace 3" <|
-            \_ ->
-                "\n\n"
-                    |> Parser.run someWhitespace
-                    |> isErr
-                    |> Expect.equal False
-
-        -- , test "someWhitespace 3" <|
-        --     \_ ->
-        --         "\n --comment"
-        --             |> Parser.run someWhitespace
-        --             |> isErr
-        --             |> Expect.equal False
-        -- , test "someWhitespace 4" <|
-        --     -- This is expected, but it should be improved so that a comment counts as whitespace
-        --     \_ ->
-        --         "--comment"
-        --             |> Parser.run someWhitespace
-        --             |> isErr
-        --             |> Expect.equal True
+        [ describe "someWhitespace"
+            [ test "none" <|
+                \_ ->
+                    ""
+                        |> Parser.run someWhitespace
+                        |> isErr
+                        |> Expect.equal True
+            , test "one" <|
+                \_ ->
+                    "\n"
+                        |> Parser.run someWhitespace
+                        |> isErr
+                        |> Expect.equal False
+            , test "two" <|
+                \_ ->
+                    "\n\n"
+                        |> Parser.run someWhitespace
+                        |> isErr
+                        |> Expect.equal False
+            ]
+        , describe "oneOrMoreSeparatedByComma"
+            [ test "just one" <|
+                \_ ->
+                    "x"
+                        |> Parser.run (oneOrMoreSeparatedByComma <| Parser.symbol "x")
+                        |> isErr
+                        |> Expect.equal False
+            , test "two" <|
+                \_ ->
+                    "x,x"
+                        |> Parser.run (oneOrMoreSeparatedByComma <| Parser.symbol "x")
+                        |> isErr
+                        |> Expect.equal False
+            , test "three" <|
+                \_ ->
+                    "x,x,x"
+                        |> Parser.run (oneOrMoreSeparatedByComma <| Parser.symbol "x")
+                        |> isErr
+                        |> Expect.equal False
+            , test "fails" <|
+                \_ ->
+                    "x,x,x,"
+                        |> Parser.run (oneOrMoreSeparatedByComma <| Parser.symbol "x")
+                        |> isErr
+                        |> Expect.equal True
+            ]
         ]

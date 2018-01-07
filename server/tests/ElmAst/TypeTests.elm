@@ -1,6 +1,6 @@
 module ElmAst.TypeTests exposing (..)
 
-import ElmAst.Type exposing (Type(..), TypeAliasDefinitionR, UnionR, parseRecord, parseTypeAlias, parseTypeConstructor, parseTypeConstructors, parseUnion)
+import ElmAst.Type exposing (Type(..), TypeAliasDefinitionR, UnionR, record, parseTypeAlias, parseTypeConstructor, parseTypeConstructors, parseUnion)
 import Expect exposing (Expectation, equalSets)
 import Result.Extra exposing (isErr)
 import Test exposing (..)
@@ -18,14 +18,14 @@ suite =
                         (Ok <|
                             Type "Int" []
                         )
-        , test "parseRecord" <|
+        , test "record" <|
             \_ ->
                 let
                     s =
                         "{ email : String, password : String, loading : Bool, error : Bool }"
                 in
                     s
-                        |> Parser.run ElmAst.Type.parseRecord
+                        |> Parser.run ElmAst.Type.record
                         |> Debug.log "result"
                         |> isErr
                         |> Expect.equal False
